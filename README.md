@@ -42,6 +42,10 @@ cd filewizard-win
 
 # Create and activate virtual environment
 python -m venv venv
+
+# Allow script execution (required once)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
 .\venv\Scripts\Activate.ps1
 
 # Install dependencies (Windows-compatible)

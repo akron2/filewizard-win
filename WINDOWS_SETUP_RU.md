@@ -14,11 +14,14 @@ python --version
 # Создайте виртуальное окружение
 python -m venv venv
 
+# Разрешите выполнение скриптов (требуется один раз)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
 # Активируйте виртуальное окружение
 .\venv\Scripts\Activate.ps1
 ```
 
-Если PowerShell блокирует выполнение скриптов, выполните:
+Если видите ошибку о выполнении скриптов, выполните:
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```

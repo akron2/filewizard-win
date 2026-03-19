@@ -14,11 +14,14 @@ python --version
 # Create virtual environment
 python -m venv venv
 
+# Allow script execution (required once)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
 # Activate virtual environment
 .\venv\Scripts\Activate.ps1
 ```
 
-If PowerShell blocks script execution, run:
+If you see an error about script execution, run:
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
