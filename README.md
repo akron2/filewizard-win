@@ -1,7 +1,5 @@
 # File Wizard - Windows Edition
 
-[![PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal&logoColor=white)](https://www.paypal.me/unterrikermanu)
-
 **Windows-compatible fork of [LoredCast/filewizard](https://github.com/LoredCast/filewizard)**
 
 > **🇷🇺 Русская версия:** [README_RU.md](README_RU.md)
@@ -98,7 +96,3 @@ https://github.com/LoredCast/filewizard
 | **faster-whisper / OpenAI Whisper (local)** | Audio: `.mp3`, `.wav`, `.m4a`, `.flac`, `.ogg`, `.opus`, `.aac` | Plain text transcripts (`.txt`), `.srt`, `.vtt`, other subtitle formats | Local Whisper implementations for speech-to-text. Models and speed depend on CPU/GPU and model variant. |
 
 ---
-
-Consider spending 30 seconds on the [» usage survey «](https://app.youform.com/forms/sdlb6mto) to help improve the app and suggest changes!
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/loredcast)
