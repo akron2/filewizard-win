@@ -22,7 +22,19 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 #### Установка Python-зависимостей
+
+**Вариант 1: Основная установка (рекомендуется)**
 ```powershell
+pip install --upgrade pip
+pip install -r requirements_windows.txt
+```
+
+**Вариант 2: Если нужен html5_parser**
+```powershell
+# Установите pkg-config через Chocolatey
+choco install pkgconfiglite
+
+# Затем установите зависимости
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
@@ -43,6 +55,7 @@ choco install tesseract
 choco install libreeoffice
 choco install pandoc
 choco install poppler
+choco install pkgconfiglite  # для html5_parser
 ```
 
 #### Вручную
