@@ -1,21 +1,17 @@
 # File Wizard - Windows Edition
 
-[![PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal&logoColor=white)](https://www.paypal.me/unterrikermanu)
-
-**Windows-compatible fork of [LoredCast/filewizard](https://github.com/LoredCast/filewizard)**
-
 A self-hosted, browser-based utility for file conversion, OCR and audio/video transcription. It wraps common CLI and Python converters (FFmpeg, LibreOffice, Pandoc, ImageMagick, etc.), plus `faster-whisper` and Tesseract OCR.
 
 ![Screenshot](screenshot.png)
 
 ---
 
-## Features / Возможности
+## Features
 
-- **Convert between many file formats** — конвертация между множеством форматов
-- **OCR for PDFs and images** — распознавание текста для PDF и изображений
-- **Audio & Video transcription** — транскрибация аудио и видео (MP4, MKV, AVI, MOV и др.)
-- **Speaker diarization** — автоматическое определение разных собеседников (требует pyannote.audio)
+- Convert between many file formats
+- OCR for PDFs and images (Tesseract / ocrmypdf)
+- Audio & Video transcription using Whisper (MP4, MKV, AVI, MOV, etc.)
+- Speaker diarization - automatically identify different speakers (requires pyannote.audio)
 - Simple, responsive dark UI with drag-and-drop
 - Background job processing with real-time status updates
 - `/settings` page for configuring tools and OAuth
@@ -23,7 +19,7 @@ A self-hosted, browser-based utility for file conversion, OCR and audio/video tr
 
 ---
 
-## Installation / Установка
+## Installation
 
 ### Quick Start — Windows
 
@@ -55,7 +51,7 @@ Open http://localhost:8000 in your browser.
 
 ---
 
-## External Tools / Внешние инструменты
+## External Tools
 
 For full functionality, install these tools:
 
@@ -84,7 +80,7 @@ choco install pkgconfiglite  # for html5_parser
 
 ---
 
-## Speaker Diarization / Разделение по спикерам
+## Speaker Diarization
 
 Speaker diarization automatically identifies different speakers in conversations.
 
@@ -112,7 +108,7 @@ When you first use diarization:
 
 ---
 
-## Usage / Использование
+## Usage
 
 1. Open http://localhost:8000
 2. Drag & drop or select files
@@ -121,7 +117,7 @@ When you first use diarization:
 
 ---
 
-## Tools Table / Таблица инструментов
+## Tools Table
 
 | Tool | Input Formats | Output Formats | Notes |
 |------|---------------|----------------|-------|
@@ -139,7 +135,7 @@ When you first use diarization:
 
 ---
 
-## Troubleshooting / Решение проблем
+## Troubleshooting
 
 ### PowerShell script execution blocked
 ```powershell
@@ -165,18 +161,14 @@ Close previous instance or change port in run.bat.
 
 ---
 
-## Security / Безопасность
+## Security
 
 **Warning:** Exposing this app publicly without authentication risks arbitrary code execution. Intended for local use or behind OAuth/OIDC.
 
 ---
 
-## Additional Information / Дополнительная информация
+## Additional Information
 
 - **Original Repository:** https://github.com/LoredCast/filewizard
 - **This Repository:** https://github.com/akron2/filewizard-win
 - **Issues:** https://github.com/akron2/filewizard-win/issues
-
----
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/loredcast)
