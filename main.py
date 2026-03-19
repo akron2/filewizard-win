@@ -19,7 +19,10 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Dict, List, Any, Optional
-import resource
+try:
+    import resource  # Unix-only
+except ImportError:
+    resource = None  # Windows compatibility
 from threading import Semaphore
 from logging.handlers import RotatingFileHandler
 from urllib.parse import urljoin, urlparse
@@ -190,6 +193,9 @@ def get_supported_output_formats_for_file(filename: str, conversion_tools_config
 # --- Resource Limiting ---
 def _limit_resources_preexec():
     """Set resource limits for child processes to prevent DoS attacks."""
+    if resource is None:
+        # Windows compatibility - resource module not available
+        return
     try:
         # 6000s CPU, 4GB address space
         resource.setrlimit(resource.RLIMIT_CPU, (6000, 6000))
@@ -1305,18 +1311,24 @@ def run_command(
     """
     logger.debug("Executing command: %s with timeout=%ss", " ".join(shlex.quote(s) for s in argv), timeout)
 
-    preexec = globals().get("_limit_resources_preexec", None)
+    # preexec_fn is Unix-only, not available on Windows
+    preexec = None
+    if os.name != 'nt':  # nt = Windows
+        preexec = globals().get("_limit_resources_preexec", None)
 
     try:
         # subprocess.run handles timeout, output capturing, and error checking.
-        result = subprocess.run(
-            argv,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            check=True,  # Raises CalledProcessError on non-zero exit
-            preexec_fn=preexec
-        )
+        kwargs = {
+            "argv": argv,
+            "capture_output": True,
+            "text": True,
+            "timeout": timeout,
+            "check": True
+        }
+        if preexec:
+            kwargs["preexec_fn"] = preexec
+            
+        result = subprocess.run(**kwargs)
         logger.debug("Command completed successfully: %s", " ".join(shlex.quote(s) for s in argv))
         return result
     except FileNotFoundError:
@@ -1889,7 +1901,11 @@ def run_conversion_task(job_id: str,
         Run command with Popen and poll the DB for cancellation. Enforce timeout.
         Returns CompletedProcess-like on success. Raises Exception on failure/timeout/cancel.
         """
-        preexec = globals().get("_limit_resources_preexec", None)
+        # preexec_fn is Unix-only, not available on Windows
+        preexec = None
+        if os.name != 'nt':  # nt = Windows
+            preexec = globals().get("_limit_resources_preexec", None)
+            
         logger.debug("Launching conversion subprocess: %s", " ".join(shlex.quote(c) for c in command))
         proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, preexec_fn=preexec)
 
@@ -2268,15 +2284,19 @@ def run_academic_pandoc_task(job_id: str, input_path_str: str, output_path_str: 
 
         # 4. Execute command directly to control working directory and error capture
         try:
-            process = subprocess.run(
-                command,
-                capture_output=True,
-                text=True,
-                timeout=300,
-                check=True,  # Raise CalledProcessError on non-zero exit
-                cwd=unzip_dir, # Run pandoc in the unzipped directory
-                preexec_fn=globals().get("_limit_resources_preexec", None)
-            )
+            # preexec_fn is Unix-only, not available on Windows
+            pandoc_kwargs = {
+                "command": command,
+                "capture_output": True,
+                "text": True,
+                "timeout": 300,
+                "check": True,
+                "cwd": unzip_dir
+            }
+            if os.name != 'nt':  # nt = Windows
+                pandoc_kwargs["preexec_fn"] = globals().get("_limit_resources_preexec", None)
+                
+            process = subprocess.run(**pandoc_kwargs)
         except subprocess.CalledProcessError as e:
             # Capture the full, detailed error log from pandoc/latex
             error_log = e.stderr or "No stderr output."

@@ -8,6 +8,8 @@ A self-hosted, browser-based utility for file conversion, OCR and audio transcri
 
 ![Screenshot](screenshot.png)
 
+> **💡 Windows Users:** See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for detailed Windows installation instructions. Quick start: run `.\run.bat` after installing dependencies.
+
 
 
 
@@ -121,15 +123,45 @@ docker compose up --build
 Note: building can be slow (TeX and other dependencies).
 
 ### Manual (no Docker)
+
+#### Linux/macOS
 ```bash
 git clone https://github.com/LoredCast/filewizard.git
 cd filewizard
 python -m venv venv
-source venv/bin/activate   # Windows: venv\\Scripts\\activate
+source venv/bin/activate
 pip install -r requirements.txt
 chmod +x run.sh
 ./run.sh
 ```
+
+#### Windows
+```powershell
+# Clone repository
+git clone https://github.com/LoredCast/filewizard.git
+cd filewizard
+
+# Create and activate virtual environment
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application (choose one):
+.\run.bat          # Batch script
+.\run.ps1          # PowerShell script
+python -m uvicorn main:app --host 0.0.0.0 --port 8000  # Manual start
+```
+
+**Note for Windows:** You'll also need to install external tools separately:
+- **Tesseract OCR:** Download from https://github.com/UB-Mannheim/tesseract/wiki
+- **FFmpeg:** Download from https://ffmpeg.org/download.html or use `choco install ffmpeg`
+- **LibreOffice:** Download from https://www.libreoffice.org/download/
+- **Pandoc:** Download from https://pandoc.org/installing.html
+- **Poppler** (for PDF tools): Download from https://github.com/oschwartz10612/poppler-windows/releases
+
+Add these tools to your system PATH after installation.
 
 Dependencies include `fastapi`, `uvicorn`, `sqlalchemy`, `huey`, `faster-whisper`, `ocrmypdf`, `pytesseract`, `python-multipart`, `pyyaml`, etc.
 
