@@ -141,5 +141,6 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ## Дополнительная информация
 
-- Документация: https://github.com/LoredCast/filewizard/wiki
-- Issues: https://github.com/LoredCast/filewizard/issues
+- **Оригинальный репозиторий:** https://github.com/LoredCast/filewizard
+- **Issues (оригинал):** https://github.com/LoredCast/filewizard/issues
+- **Этот репозиторий:** https://github.com/akron2/filewizard-win

@@ -1,5 +1,7 @@
 # File Wizard - Docker на Windows
 
+**Windows-compatible fork of [LoredCast/filewizard](https://github.com/LoredCast/filewizard)**
+
 ## Запуск Docker на Windows
 
 File Wizard поддерживает запуск в Docker на Windows через **Docker Desktop**.
@@ -27,14 +29,17 @@ cd filewizard-win
 mkdir config
 ```
 
-### 2. Запуск с готовым образом (рекомендуется)
+### 2. Запуск с готовым образом
+
+> **Примечание:** Готовый образ `loredcast/filewizard:latest` может быть устаревшим. Рекомендуется сборка локально (шаг 3).
+
 ```powershell
 docker compose up -d
 ```
 
 Приложение будет доступно по адресу: http://localhost:6969
 
-### 3. Сборка локально (если нужно)
+### 3. Сборка локально (рекомендуется)
 ```powershell
 # Полная версия (без CUDA)
 docker build --target full-final -t filewizard:local .

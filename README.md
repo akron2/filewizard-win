@@ -1,14 +1,16 @@
-# File Wizard
+# File Wizard - Windows Edition
 
 [![PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal&logoColor=white)](https://www.paypal.me/unterrikermanu)
-[![Docker Pulls](https://img.shields.io/docker/pulls/loredcast/filewizard.svg)](https://hub.docker.com/r/loredcast/filewizard)
-[![Docker Image Version](https://img.shields.io/docker/v/loredcast/filewizard/0.4-latest.svg)](https://hub.docker.com/r/loredcast/filewizard)
+
+**Windows-compatible fork of [LoredCast/filewizard](https://github.com/LoredCast/filewizard)**
 
 A self-hosted, browser-based utility for file conversion, OCR and audio transcription. It wraps common CLI and Python converters (FFmpeg, LibreOffice, Pandoc, ImageMagick, etc.), plus `faster-whisper` and Tesseract OCR.
 
 ![Screenshot](screenshot.png)
 
 > **💡 Windows Users:** See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for detailed Windows installation instructions. Quick start: run `.\run.bat` after installing dependencies.
+
+> **🐳 Docker:** See [DOCKER_WINDOWS.md](DOCKER_WINDOWS.md) for Docker setup on Windows.
 
 
 
@@ -29,152 +31,46 @@ A self-hosted, browser-based utility for file conversion, OCR and audio transcri
 FastAPI, vanilla HTML/JS/CSS frontend.
 
 ## Installation
-### Recommended — Docker (pull from Docker Hub)
 
-> **⚠️ Note:** The pre-built image on Docker Hub may be outdated. For the latest version, build locally (see below).
+### Quick Start — Windows Native
 
-> **💡 Windows Users:** See [DOCKER_WINDOWS.md](DOCKER_WINDOWS.md) for detailed Docker setup on Windows.
-
-Images available:
-- `loredcast/filewizard:latest` (newest full release without cuda) — **may be outdated**
-- `loredcast/filewizard:0.3-small` (omits TeX and other large tools)
-- `loredcast/filewizard:0.3-cuda` (CUDA-enabled)
-
-```
-# docker-compose.yml
-version: "3.9"
-services:
-  web:
-    image: loredcast/filewizard:latest
-    environment:
-      - LOCAL_ONLY=True # False for Auth
-      - SECRET_KEY= # set if using auth
-      - UPLOADS_DIR=/app/uploads # inside the container
-      - PROCESSED_DIR=/app/processed # inside the container
-      - OMP_NUM_THREADS=1
-      - DOWNLOAD_KOKORO_ON_STARTUP=true
-    ports:
-      - "6969:8000"
-    volumes:
-      - ./config:/app/config # settings.yml will be here
-      - ./uploads_data:/app/uploads
-      - ./processed_data:/app/processed
-volumes:
-  uploads_data: {}
-  processed_data: {}
-```
-
-
-Copy `docker-compose.yml` from the repo or the above, adjust as needed, then:
-
-```bash
-# Build and run (recommended for latest version)
-docker compose up -d --build
-
-# Or use pre-built image (may be outdated)
-docker compose up -d
-```
-FileWizard will be available at `localhost:6969`
-
-### Build locally with Docker
-
-The docker-compose.yml is configured to build locally by default. To build manually:
-
-```bash
-# Full build (includes all dependencies but no CUDA)
-docker build --target full-final -t filewizard:full .
-
-# Small build (excludes TeX and some large dependencies)
-docker build --target small-final -t filewizard:small .
-
-# CUDA build (includes CUDA support for GPU acceleration)
-docker build --target cuda-final -t filewizard:cuda .
-```
-
-Or with docker-compose:
-
-```bash
-# Build and run
-docker compose up -d --build
-
-# Rebuild without cache (if needed)
-docker compose build --no-cache
-docker compose up -d
-```
-
-For CUDA builds, ensure you have:
-- NVIDIA Docker runtime installed (`nvidia-docker2` package)
-- Compatible GPU with appropriate drivers
-- Add the GPU configuration to docker-compose.yml:
-```yaml
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-```
-
-For troubleshooting GPU issues, make sure:
-1. Your GPU drivers support the CUDA version (12.1)
-2. cuDNN libraries are properly installed in the container
-3. The `nvidia-container-toolkit` is properly configured
-4. Test NVIDIA setup with: `docker run --rm --gpus all nvidia/cuda:12.1-base-ubuntu22.04 nvidia-smi`
-
-```bash
-git clone https://github.com/LoredCast/filewizard.git
-cd filewizard
-docker compose up --build
-```
-Note: building can be slow (TeX and other dependencies).
-
-### Manual (no Docker)
-
-#### Linux/macOS
-```bash
-git clone https://github.com/LoredCast/filewizard.git
-cd filewizard
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-chmod +x run.sh
-./run.sh
-```
-
-#### Windows
 ```powershell
-# Clone repository
-git clone https://github.com/LoredCast/filewizard.git
-cd filewizard
+# Clone this repository
+git clone https://github.com/akron2/filewizard-win.git
+cd filewizard-win
 
 # Create and activate virtual environment
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies (Windows-compatible)
+pip install -r requirements_windows.txt
 
-# Run the application (choose one):
-.\run.bat          # Batch script
-.\run.ps1          # PowerShell script
-python -m uvicorn main:app --host 0.0.0.0 --port 8000  # Manual start
+# Run the application
+.\run.bat
 ```
 
-**Note for Windows:** You'll also need to install external tools separately:
-- **Tesseract OCR:** Download from https://github.com/UB-Mannheim/tesseract/wiki
-- **FFmpeg:** Download from https://ffmpeg.org/download.html or use `choco install ffmpeg`
-- **LibreOffice:** Download from https://www.libreoffice.org/download/
-- **Pandoc:** Download from https://pandoc.org/installing.html
-- **Poppler** (for PDF tools): Download from https://github.com/oschwartz10612/poppler-windows/releases
+Open http://localhost:8000 in your browser.
 
-Add these tools to your system PATH after installation.
+### Docker on Windows
 
-Dependencies include `fastapi`, `uvicorn`, `sqlalchemy`, `huey`, `faster-whisper`, `ocrmypdf`, `pytesseract`, `python-multipart`, `pyyaml`, etc.
+See [DOCKER_WINDOWS.md](DOCKER_WINDOWS.md) for detailed Docker Desktop setup.
+
+```powershell
+# Build and run (recommended for latest version)
+docker compose up -d --build
+```
+
+### Original Repository
+
+This is a Windows-compatible fork. For the original Linux/Docker-focused version, see:
+https://github.com/LoredCast/filewizard
 
 ## Configuration & docs
-See the project Wiki for details and examples:  
-https://github.com/LoredCast/filewizard/wiki
+
+- **Windows Setup:** See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for detailed installation guide
+- **Docker on Windows:** See [DOCKER_WINDOWS.md](DOCKER_WINDOWS.md) for Docker Desktop setup
+- **Original Wiki:** https://github.com/LoredCast/filewizard/wiki (for conversion tools reference)
 
 ## Usage
 1. Open `http://127.0.0.1:8000`.
