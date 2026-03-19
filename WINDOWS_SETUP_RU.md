@@ -34,15 +34,11 @@ pip install --upgrade pip
 pip install -r requirements_windows.txt
 ```
 
-**Опционально: Если нужен html5_parser**
-```powershell
-# Установите pkg-config через Chocolatey
-choco install pkgconfiglite
+**Примечание:** pyannote.audio (разделение по спикерам) требует принятия условий моделей на Hugging Face:
+- https://huggingface.co/pyannote/speaker-diarization-3.1
+- https://huggingface.co/pyannote/segmentation-3.0
 
-# Затем установите зависимости
-pip install --upgrade pip
-pip install -r requirements_windows.txt
-```
+Возможно, потребуется создать учётную запись Hugging Face и принять условия перед использованием диаризации.
 
 ### 2. Установка внешних инструментов (опционально)
 
@@ -71,21 +67,6 @@ choco install pkgconfiglite  # для html5_parser
 - **Poppler** (для PDF): https://github.com/oschwartz10612/poppler-windows/releases
 
 После установки добавьте пути к инструментам в системную переменную PATH.
-
-### Опционально: Разделение по спикерам
-
-Для включения определения собеседников (диаризация):
-
-```powershell
-# Установите pyannote.audio для диаризации
-pip install pyannote.audio pyannote.pipeline
-
-# Примечание: может потребоваться токен Hugging Face
-# Получить токен: https://huggingface.co/settings/tokens
-```
-
-Затем примите условия использования моделей:
-- https://huggingface.co/pyannote/speaker-diarization-3.1
 
 ### 3. Настройка окружения
 
