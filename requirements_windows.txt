@@ -51,8 +51,7 @@ bleach>=6.1.0
 # docling
 
 # Audio decoding (torchcodec for audio processing with faster-whisper/pyannote)
-# torchcodec is disabled on Windows due to FFmpeg DLL compatibility issues
-# The application uses faster-whisper's built-in audio decoding instead
-# Uncomment the following lines if you want to try torchcodec on Linux:
-# --extra-index-url https://download.pytorch.org/whl/cpu
-# torchcodec>=0.2.0
+# torchcodec is required for speaker diarization (pyannote.audio)
+# FFmpeg DLLs are provided by run.bat and added to PATH before Python starts
+--extra-index-url https://download.pytorch.org/whl/cpu
+torchcodec>=0.2.0

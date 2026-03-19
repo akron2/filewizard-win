@@ -15,15 +15,10 @@ import cv2
 import numpy as np
 import secrets
 import hashlib
-import warnings
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Dict, List, Any, Optional
-
-# Suppress torchcodec warnings (torchcodec is optional and may fail on Windows)
-warnings.filterwarnings("ignore", message=".*Could not load libtorchcodec.*")
-warnings.filterwarnings("ignore", message=".*FFmpeg version.*")
 try:
     import resource  # Unix-only
 except ImportError:
@@ -98,14 +93,15 @@ except ImportError:
     PiperVoice = None
 
 # --- Optional Dependency Handling for torchcodec (audio decoding) ---
-# torchcodec is optional and may fail to load on Windows due to FFmpeg DLL issues
-# The application works fine without it, so we suppress all errors
+# torchcodec is required for speaker diarization (pyannote.audio)
+# FFmpeg DLLs are provided by run.bat and added to PATH before Python starts
 _TORCHCODEC_AVAILABLE = False
 try:
     import torchcodec
     _TORCHCODEC_AVAILABLE = True
 except (ImportError, OSError, RuntimeError):
-    # torchcodec is optional - silently ignore failures
+    # torchcodec may fail to load if FFmpeg DLLs are not available
+    # This is expected on some Windows configurations
     pass
 
 import wave
@@ -2644,7 +2640,8 @@ async def lifespan(app: FastAPI):
         logger.warning("piper-tts is not installed. Piper TTS features will be disabled. Install with: pip install piper-tts")
     if not shutil.which("kokoro-tts"):
         logger.warning("kokoro-tts command not found in PATH. Kokoro TTS features will be disabled.")
-    # torchcodec is optional - no warning needed as it's silently handled
+    # torchcodec is required for speaker diarization (pyannote.audio)
+    # FFmpeg DLLs are provided by run.bat and added to PATH before Python starts
 
     ENV = os.environ.get('ENV', 'dev').lower()
     ALLOW_LOCAL_ONLY = os.environ.get('ALLOW_LOCAL_ONLY', 'false').lower() == 'true'
