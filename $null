@@ -1,47 +1,17 @@
 error: unknown switch `C'
-usage: git merge [<options>] [<commit>...]
-   or: git merge --abort
-   or: git merge --continue
+usage: git rm [-f | --force] [-n] [-r] [--cached] [--ignore-unmatch]
+              [--quiet] [--pathspec-from-file=<file> [--pathspec-file-nul]]
+              [--] [<pathspec>...]
 
-    -n                    do not show a diffstat at the end of the merge
-    --[no-]stat           show a diffstat at the end of the merge
-    --[no-]summary        (synonym to --stat)
-    --[no-]compact-summary
-                          show a compact-summary at the end of the merge
-    --[no-]log[=<n>]      add (at most <n>) entries from shortlog to merge commit message
-    --[no-]squash         create a single commit instead of doing a merge
-    --[no-]commit         perform a commit if the merge succeeds (default)
-    -e, --[no-]edit       edit message before committing
-    --[no-]cleanup <mode> how to strip spaces and #comments from message
-    --[no-]ff             allow fast-forward (default)
-    --ff-only             abort if fast-forward is not possible
-    --[no-]rerere-autoupdate
-                          update the index with reused conflict resolution if possible
-    --[no-]verify-signatures
-                          verify that the named commit has a valid GPG signature
-    -s, --[no-]strategy <strategy>
-                          merge strategy to use
-    -X, --[no-]strategy-option <option=value>
-                          option for selected merge strategy
-    -m, --[no-]message <message>
-                          merge commit message (for a non-fast-forward merge)
-    -F, --file <path>     read message from file
-    --[no-]into-name <name>
-                          use <name> instead of the real target
-    -v, --[no-]verbose    be more verbose
-    -q, --[no-]quiet      be more quiet
-    --[no-]abort          abort the current in-progress merge
-    --[no-]quit           --abort but leave index and working tree alone
-    --[no-]continue       continue the current in-progress merge
-    --[no-]allow-unrelated-histories
-                          allow merging unrelated histories
-    --[no-]progress       force progress reporting
-    -S, --[no-]gpg-sign[=<key-id>]
-                          GPG sign commit
-    --[no-]autostash      automatically stash/stash pop before and after
-    --[no-]overwrite-ignore
-                          update ignored files (default)
-    --[no-]signoff        add a Signed-off-by trailer
-    --no-verify           bypass pre-merge-commit and commit-msg hooks
-    --verify              opposite of --no-verify
+    -n, --[no-]dry-run    dry run
+    -q, --[no-]quiet      do not list removed files
+    --[no-]cached         only remove from the index
+    -f, --[no-]force      override the up-to-date check
+    -r                    allow recursive removal
+    --[no-]ignore-unmatch exit with a zero status even if nothing matched
+    --[no-]sparse         allow updating entries outside of the sparse-checkout cone
+    --[no-]pathspec-from-file <file>
+                          read pathspec from file
+    --[no-]pathspec-file-nul
+                          with --pathspec-from-file, pathspec elements are separated with NUL character
 
