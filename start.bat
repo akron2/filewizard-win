@@ -56,5 +56,6 @@ echo.
 echo Press Ctrl+C to stop the server.
 echo.
 
-REM Start Uvicorn
-python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+REM Start Uvicorn with Huey consumer in the same process (single-worker mode)
+REM For production, use run.bat which runs them separately
+python -c "import threading, time; from main import huey; from huey.consumer import Consumer; threading.Thread(target=lambda: Consumer(huey, workers=2).run(), daemon=True).start(); import uvicorn; uvicorn.run('main:app', host='0.0.0.0', port=8000, reload=False)"

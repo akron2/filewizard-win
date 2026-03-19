@@ -98,4 +98,4 @@ Write-Host "The web server will continue running in a separate window."
 Write-Host ""
 
 # Start Huey consumer in the current process
-python -m huey_consumer main.huey -w 4
+python -c "from main import huey; from huey.consumer import Consumer; Consumer(huey, workers=4).run()"

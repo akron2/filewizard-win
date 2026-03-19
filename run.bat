@@ -83,4 +83,4 @@ set SECRET_KEY=%SECRET_KEY%
 set UPLOADS_DIR=%UPLOADS_DIR%
 set PROCESSED_DIR=%PROCESSED_DIR%
 set CHUNK_TMP_DIR=%CHUNK_TMP_DIR%
-python -m huey_consumer main.huey -w 4
+python -c "from main import huey; from huey.consumer import Consumer; Consumer(huey, workers=4).run()"
