@@ -1414,6 +1414,15 @@ def run_transcription_task(job_id: str, input_path_str: str, output_path_str: st
 
         update_job_status(db, job_id, "processing", progress=0)
 
+        # Check if FFmpeg is available (required for video files and some audio formats)
+        video_exts = {".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv", ".wmv", ".mpeg", ".mpg", ".3gp", ".m4v"}
+        input_ext = input_path.suffix.lower()
+        if input_ext in video_exts:
+            ffmpeg_path = shutil.which("ffmpeg")
+            if not ffmpeg_path:
+                raise RuntimeError("FFmpeg is required for video transcription but was not found. Please install FFmpeg and add it to your PATH.")
+            logger.info(f"Video file detected, FFmpeg found at: {ffmpeg_path}")
+
         model = get_whisper_model(model_size, whisper_settings)
         logger.info(f"Starting transcription for job {job_id} with model '{model_size}'")
         
@@ -2916,9 +2925,13 @@ async def submit_audio_transcription(
     generate_timestamps: bool = Form(False),
     db: Session = Depends(get_db), user: dict = Depends(require_user)
 ):
-    allowed_audio_exts = {".mp3", ".wav", ".m4a", ".flac", ".ogg", ".opus"}
-    if not is_allowed_file(file.filename, allowed_audio_exts):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid audio file type.")
+    # Audio and video formats (FFmpeg can extract audio from video)
+    allowed_audio_exts = {".mp3", ".wav", ".m4a", ".flac", ".ogg", ".opus", ".aac", ".aiff", ".wma"}
+    allowed_video_exts = {".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv", ".wmv", ".mpeg", ".mpg", ".3gp", ".m4v"}
+    allowed_exts = allowed_audio_exts | allowed_video_exts
+    
+    if not is_allowed_file(file.filename, allowed_exts):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid audio/video file type.")
 
     whisper_config = APP_CONFIG.get("transcription_settings", {}).get("whisper", {})
     if model_size not in whisper_config.get("allowed_models", []):

@@ -19,7 +19,7 @@ A self-hosted, browser-based utility for file conversion, OCR and audio transcri
 ## Features
 - Convert between many file formats; extendable via `settings.yml` to add any CLI tool.
 - OCR for PDFs and images (`tesseract` / `ocrmypdf`).
-- Audio transcription using Whisper models.
+- **Audio & Video transcription** using Whisper models (supports MP4, MKV, AVI, MOV, and more).
 - Simple, responsive dark UI with drag-and-drop and file picker.
 - Background job processing with real-time status updates and persistent history.
 - `/settings` page for configuring conversion tools and OAuth (runs without auth in local mode).
