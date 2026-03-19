@@ -60,18 +60,11 @@ from typing import List as TypingList
 from starlette.middleware.sessions import SessionMiddleware
 from authlib.integrations.starlette_client import OAuth
 from dotenv import load_dotenv
-from piper import PiperVoice
-import wave
-import io
-import mimetypes
-
-ENABLE_WEBSOCKETS = False
-
-
-load_dotenv()
 
 # --- Optional Dependency Handling for Piper TTS ---
+PiperVoice = None
 try:
+    from piper import PiperVoice
     from piper.synthesis import SynthesisConfig
     # download helpers: some piper versions export download_voice, others expose ensure_voice_exists/find_voice
     try:
@@ -97,7 +90,14 @@ except ImportError:
     ensure_voice_exists = None
     find_voice = None
     VoiceNotFoundError = None
+    PiperVoice = None
 
+import wave
+import io
+import mimetypes
+
+ENABLE_WEBSOCKETS = False
+load_dotenv()
 
 try:
     from PyPDF2 import PdfMerger
