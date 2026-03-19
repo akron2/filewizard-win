@@ -1,9 +1,5 @@
 # File Wizard - Windows Edition
 
-[![PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal&logoColor=white)](https://www.paypal.me/unterrikermanu)
-
-**Windows-compatible fork of [LoredCast/filewizard](https://github.com/LoredCast/filewizard)**
-
 A self-hosted, browser-based utility for file conversion, OCR and audio transcription. It wraps common CLI and Python converters (FFmpeg, LibreOffice, Pandoc, ImageMagick, etc.), plus `faster-whisper` and Tesseract OCR.
 
 ![Screenshot](screenshot.png)
