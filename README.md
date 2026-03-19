@@ -30,6 +30,9 @@ FastAPI, vanilla HTML/JS/CSS frontend.
 
 ## Installation
 ### Recommended — Docker (pull from Docker Hub)
+
+> **💡 Windows Users:** See [DOCKER_WINDOWS.md](DOCKER_WINDOWS.md) for detailed Docker setup on Windows.
+
 Images available:
 - `loredcast/filewizard:latest` (newest full release without cuda)
 - `loredcast/filewizard:0.3-small` (omits TeX and other large tools)
