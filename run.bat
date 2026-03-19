@@ -11,15 +11,15 @@ REM Check and download FFmpeg if not found
 where ffmpeg >nul 2>nul
 if errorlevel 1 (
     echo FFmpeg not found. Downloading...
-    mkdir .\ffmpeg_temp 2>nul
+    if not exist ".\ffmpeg_temp" mkdir ".\ffmpeg_temp"
     cd ffmpeg_temp
     
     REM Download FFmpeg (static build for Windows)
     echo Downloading FFmpeg...
-    powershell -Command "& {Invoke-WebRequest -Uri 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip' -OutFile 'ffmpeg.zip'}"
+    powershell -Command "Invoke-WebRequest -Uri 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip' -OutFile 'ffmpeg.zip'"
     
     echo Extracting FFmpeg...
-    powershell -Command "& {Expand-Archive -Path 'ffmpeg.zip' -DestinationPath '.' -Force}"
+    powershell -Command "Expand-Archive -Path 'ffmpeg.zip' -DestinationPath '.' -Force"
     
     REM Find the extracted folder (name varies by version)
     for /d %%i in (ffmpeg-*) do set "FFMPEG_DIR=%%i"
@@ -27,21 +27,17 @@ if errorlevel 1 (
     if defined FFMPEG_DIR (
         echo FFmpeg downloaded successfully.
         echo Adding FFmpeg to PATH for this session...
-        cd "%FFMPEG_DIR%\bin"
-        set "FFMPEG_PATH=%CD%"
-        cd ..\..
-        cd ..
+        set "FFMPEG_PATH=%CD%\%FFMPEG_DIR%\bin"
         set "PATH=%FFMPEG_PATH%;%PATH%"
         echo FFmpeg is now available.
     ) else (
         echo WARNING: Failed to locate FFmpeg after extraction.
         echo Please install FFmpeg manually or check your internet connection.
-        cd ..
     )
     
     cd ..
 ) else (
-    echo FFmpeg found: %PATH%
+    for %%i in (ffmpeg.exe) do echo FFmpeg found: %%~$PATH:i
 )
 
 echo.
