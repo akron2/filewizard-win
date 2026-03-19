@@ -1,146 +1,148 @@
-# File Wizard - Windows Quick Start Guide
+# File Wizard - Windows Setup Guide
 
-## Быстрая установка на Windows
+> **🇷🇺 Русская версия:** [WINDOWS_SETUP_RU.md](WINDOWS_SETUP_RU.md)
 
-### 1. Установка зависимостей
+## Quick Start for Windows
 
-#### Python и виртуальное окружение
+### 1. Install Dependencies
+
+#### Python and Virtual Environment
 ```powershell
-# Убедитесь, что Python 3.10+ установлен
+# Make sure Python 3.10+ is installed
 python --version
 
-# Создайте виртуальное окружение
+# Create virtual environment
 python -m venv venv
 
-# Активируйте виртуальное окружение
+# Activate virtual environment
 .\venv\Scripts\Activate.ps1
 ```
 
-Если PowerShell блокирует выполнение скриптов, выполните:
+If PowerShell blocks script execution, run:
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-#### Установка Python-зависимостей
+#### Install Python Dependencies
 
-**Вариант 1: Основная установка (рекомендуется)**
+**Option 1: Standard installation (recommended)**
 ```powershell
 pip install --upgrade pip
 pip install -r requirements_windows.txt
 ```
 
-**Вариант 2: Если нужен html5_parser**
+**Option 2: If you need html5_parser**
 ```powershell
-# Установите pkg-config через Chocolatey
+# Install pkg-config via Chocolatey
 choco install pkgconfiglite
 
-# Затем установите зависимости
+# Then install dependencies
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 2. Установка внешних инструментов (опционально)
+### 2. Install External Tools (Optional)
 
-Для полной функциональности установите следующие инструменты:
+For full functionality, install these tools:
 
-#### Через Chocolatey (рекомендуется)
+#### Via Chocolatey (recommended)
 ```powershell
-# Установите Chocolatey, если ещё не установлен
-# Запустите PowerShell от имени администратора и выполните:
+# Install Chocolatey if not already installed
+# Run PowerShell as Administrator and execute:
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
-# Установите инструменты
+# Install tools
 choco install ffmpeg
 choco install tesseract
 choco install libreeoffice
 choco install pandoc
 choco install poppler
-choco install pkgconfiglite  # для html5_parser
+choco install pkgconfiglite  # for html5_parser
 ```
 
-#### Вручную
+#### Manual Installation
 - **Tesseract OCR:** https://github.com/UB-Mannheim/tesseract/wiki
 - **FFmpeg:** https://ffmpeg.org/download.html
 - **LibreOffice:** https://www.libreoffice.org/download/
 - **Pandoc:** https://pandoc.org/installing.html
-- **Poppler:** https://github.com/oschwartz10612/poppler-windows/releases
+- **Poppler** (for PDF tools): https://github.com/oschwartz10612/poppler-windows/releases
 
-После установки добавьте пути к инструментам в системную переменную PATH.
+After installation, add these tools to your system PATH.
 
-### 3. Настройка окружения
+### 3. Configure Environment
 
-Скопируйте файл окружения:
+Copy the environment file:
 ```powershell
 copy .env.example .env
 ```
 
-При необходимости отредактируйте `.env` файл.
+Edit the `.env` file if needed.
 
-### 4. Запуск приложения
+### 4. Run the Application
 
-#### Вариант 1: Batch-скрипт (рекомендуется)
+#### Option 1: Batch script (recommended)
 ```powershell
 .\run.bat
 ```
 
-#### Вариант 2: PowerShell-скрипт
+#### Option 2: PowerShell script
 ```powershell
 .\run.ps1
 ```
 
-#### Вариант 3: Ручной запуск
+#### Option 3: Manual start
 ```powershell
-# В одном окне терминала запустите веб-сервер
+# In one terminal window, start the web server
 python -m uvicorn main:app --host 0.0.0.0 --port 8000
 
-# В другом окне запустите worker задач
+# In another window, start the task worker
 python -m huey_consumer main.huey -w 4
 ```
 
-### 5. Доступ к приложению
+### 5. Access the Application
 
-Откройте браузер и перейдите по адресу:
+Open your browser and go to:
 ```
 http://localhost:8000
 ```
 
-## Устранение проблем
+## Troubleshooting
 
-### Ошибка "TesseractNotFoundError"
-Установите Tesseract OCR и добавьте его в PATH:
+### Error: "TesseractNotFoundError"
+Install Tesseract OCR and add it to PATH:
 ```powershell
 choco install tesseract
 ```
 
-### Ошибка "ffmpeg not found"
-Установите FFmpeg:
+### Error: "ffmpeg not found"
+Install FFmpeg:
 ```powershell
 choco install ffmpeg
 ```
 
-### Ошибка при импорте resource
-Эта ошибка исправлена в версии для Windows. Модуль `resource` недоступен на Windows, приложение теперь обрабатывает это корректно.
+### Error importing resource module
+This error is fixed in the Windows version. The `resource` module is not available on Windows, and the application now handles this correctly.
 
-### Блокировка PowerShell скриптов
-Если видите ошибку о выполнении скриптов:
+### PowerShell script execution blocked
+If you see an error about script execution:
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-### Проблемы с CUDA/GPU
-Для работы с CUDA на Windows:
-1. Установите NVIDIA драйверы
-2. Установите CUDA Toolkit
-3. Используйте `requirements_cuda.txt` вместо `requirements.txt`
+### CUDA/GPU issues
+For CUDA support on Windows:
+1. Install NVIDIA drivers
+2. Install CUDA Toolkit
+3. Use `requirements_cuda.txt` instead of `requirements.txt`
 
-## Остановка приложения
+## Stopping the Application
 
-- При использовании `.bat` или `.ps1`: нажмите `Ctrl+C` в окне терминала
-- Веб-сервер остановится автоматически при закрытии окна
-- Worker задач остановится при нажатии `Ctrl+C`
+- When using `.bat` or `.ps1`: press `Ctrl+C` in the terminal window
+- The web server will stop automatically when you close the window
+- The task worker will stop when you press `Ctrl+C`
 
-## Дополнительная информация
+## Additional Information
 
-- **Оригинальный репозиторий:** https://github.com/LoredCast/filewizard
-- **Issues (оригинал):** https://github.com/LoredCast/filewizard/issues
-- **Этот репозиторий:** https://github.com/akron2/filewizard-win
+- **Original Repository:** https://github.com/LoredCast/filewizard
+- **Issues (original):** https://github.com/LoredCast/filewizard/issues
+- **This Repository:** https://github.com/akron2/filewizard-win

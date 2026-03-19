@@ -1,5 +1,11 @@
 # File Wizard - Windows Edition
 
+[![PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal&logoColor=white)](https://www.paypal.me/unterrikermanu)
+
+**Windows-compatible fork of [LoredCast/filewizard](https://github.com/LoredCast/filewizard)**
+
+> **🇷🇺 Русская версия:** [README_RU.md](README_RU.md)
+
 A self-hosted, browser-based utility for file conversion, OCR and audio transcription. It wraps common CLI and Python converters (FFmpeg, LibreOffice, Pandoc, ImageMagick, etc.), plus `faster-whisper` and Tesseract OCR.
 
 ![Screenshot](screenshot.png)
@@ -8,8 +14,7 @@ A self-hosted, browser-based utility for file conversion, OCR and audio transcri
 
 > **🐳 Docker:** See [DOCKER_WINDOWS.md](DOCKER_WINDOWS.md) for Docker setup on Windows.
 
-
-
+---
 
 ## Features
 - Convert between many file formats; extendable via `settings.yml` to add any CLI tool.
@@ -74,7 +79,7 @@ https://github.com/LoredCast/filewizard
 3. Select action: Convert, OCR, or Transcribe.
 4. Track job progress in the History table (updates automatically).
 
-# Tools Table
+## Tools Table
 
 | Tool | Common inputs (extensions / format names) | Common outputs (extensions / format names) | Notes |
 |---|---|---|---|
@@ -82,7 +87,7 @@ https://github.com/LoredCast/filewizard
 | **Pandoc** | Markdown flavors (`.md`, `.markdown`), `.html/.htm`, LaTeX (`.tex`), `.rst`, `.docx`, `.odt`, `.epub`, `.ipynb`, `.opml`, `.adoc`/asciidoc, `.tex`, `.bib`/citation inputs | `.html/.html5`, `.xhtml`, `.latex/.tex`, `.pdf` (via LaTeX engine), `.docx`, `.odt`, `.epub`, `.md` (flavors), `.gfm`, `.rst`, `.pptx`, `.man`, `.mediawiki`, `.docbook` | Highly configurable via templates/filters; requires LaTeX for PDF output. |
 | **Ghostscript (gs)** | `.ps`, `.eps`, `.pdf`, PostScript streams | `.pdf` (various compat levels incl PDF/A), `.ps`, `.eps`, raster images (`.png`, `.jpg`, `.tiff`, `.bmp`, `.pnm`) | Useful for PDF manipulations, rasterization, and producing PDF/A. |
 | **Calibre (ebook-convert)** | `.epub`, `.mobi`, `.azw3`, `.azw`, `.fb2`, `.html`, `.docx`, `.doc`, `.rtf`, `.txt`, `.pdb`, `.lit`, `.tcr`, `.cbz`, `.cbr`, `.odt`, `.pdf` (input with caveats) | `.epub`, `.mobi` (legacy), `.azw3`, `.pdf`, `.docx`, `.rtf`, `.txt`, `.fb2`, `.htmlz`, `.pdb`, `.lrf`, `.lit`, `.tcr`, `.cbz`, `.cbr` | Excellent for ebook format conversions and metadata handling; PDF input/output fidelity varies. |
-| **FFmpeg** | Containers & codecs: `.mp4`, `.mkv`, `.mov`, `.avi`, `.webm`, `.flv`, `.wmv`, `.mpg/.mpeg`, `.ts`, `.m2ts`, `.3gp`, audio: `.mp3`, `.wav`, `.aac/.m4a`, `.flac`, `.ogg`, `.opus`, image sequences (`.png`, `.jpg`, `.tiff`), HLS (`.m3u8`) | Wide set: `.mp4`, `.mkv`, `.mov`, `.webm`, `.avi`, `.flv`, `.mp3`, `.aac/.m4a`, `.wav`, `.flac`, `.ogg`, `.opus`, `.gif` (animated), `.ts`, elementary streams, many codec/container combos | Extremely versatile — audio/video transcoding, extraction, container changes, filters. Supported formats depend on build flags and linked libraries. |
+| **FFmpeg** | Containers & codecs: `.mp4`, `.mkv`, `.mov`, `.avi`, `.webm`, `.flv`, `.wmv`, `.mpg/.mpeg`, `.ts`, `.m2ts`, `.3gp`, audio: `.mp3`, `.wav`, `.aac/.m4a`, `.flac`, `.ogg`, `.opus`, image sequences (`.png`, `.jpg`, `.tiff`) | Wide set: `.mp4`, `.mkv`, `.mov`, `.webm`, `.avi`, `.flv`, `.mp3`, `.aac/.m4a`, `.wav`, `.flac`, `.ogg`, `.opus`, `.gif` (animated), `.ts`, elementary streams, many codec/container combos | Extremely versatile - audio/video transcoding, extraction, container changes, filters. Supported formats depend on build flags and linked libraries. |
 | **libvips (vips)** | `.jpg/.jpeg`, `.png`, `.tif/.tiff`, `.webp`, `.avif`, `.heif/.heic`, `.jp2`, `.gif` (frames), `.pnm`, `.fits`, `.exr`, PDF (via poppler delegate) | `.jpg/.jpeg`, `.png`, `.tif/.tiff`, `.webp`, `.avif`, `.heif`, `.jp2`, `.pnm`, `.v` (VIPS native), `.fits`, `.exr` | Fast, memory-efficient image processing; great for large images and tiling. |
 | **GraphicsMagick (gm)** | `.jpg/.jpeg`, `.png`, `.gif`, `.tif/.tiff`, `.bmp`, `.ico`, `.eps`, `.pdf` (via Ghostscript/poppler), `.dpx`, `.pnm`, `.svg` (if delegate), `.webp` (if built), `.exr` | `.jpg/.jpeg`, `.png`, `.webp` (if enabled), `.tif/.tiff`, `.gif`, `.bmp`, `.pdf` (from images), `.eps`, `.ico`, `.xpm`, `.dpx` | Similar to ImageMagick but with different performance/behavior; supported formats depend on build/delegates. |
 | **ImageMagick (convert / magick)** | Same as GraphicsMagick (large set; many delegates) | Same as GraphicsMagick | Often used interchangeably; watch for security considerations when processing untrusted images. |
@@ -98,10 +103,8 @@ https://github.com/LoredCast/filewizard
 | **Tesseract OCR / ocrmypdf** | Image formats (`.png`, `.jpg`, `.jpeg`, `.tiff`), PDFs (image PDFs) | Plain text (`.txt`), searchable PDF (PDF with text layer), HOCR, ALTO XML | OCR engine; language/training data required for best accuracy. `ocrmypdf` is a wrapper for PDF workflows. |
 | **faster-whisper / OpenAI Whisper (local)** | Audio: `.mp3`, `.wav`, `.m4a`, `.flac`, `.ogg`, `.opus`, `.aac` | Plain text transcripts (`.txt`), `.srt`, `.vtt`, other subtitle formats | Local Whisper implementations for speech-to-text. Models and speed depend on CPU/GPU and model variant. |
 
-
+---
 
 Consider spending 30 seconds on the [» usage survey «](https://app.youform.com/forms/sdlb6mto) to help improve the app and suggest changes!
 
-
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/loredcast)
----
