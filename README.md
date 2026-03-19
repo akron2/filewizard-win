@@ -1,43 +1,38 @@
 # File Wizard - Windows Edition
 
-**Windows-compatible fork of [LoredCast/filewizard](https://github.com/LoredCast/filewizard)**
+[![PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal&logoColor=white)](https://www.paypal.me/unterrikermanu)
 
-> **🇷🇺 Русская версия:** [README_RU.md](README_RU.md)
+**Windows-compatible fork of [LoredCast/filewizard](https://github.com/LoredCast/filewizard)**
 
 A self-hosted, browser-based utility for file conversion, OCR and audio/video transcription. It wraps common CLI and Python converters (FFmpeg, LibreOffice, Pandoc, ImageMagick, etc.), plus `faster-whisper` and Tesseract OCR.
 
 ![Screenshot](screenshot.png)
 
-> **💡 Windows Users:** See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for detailed installation instructions. Quick start: run `.\run.bat` after installing dependencies.
+---
+
+## Features / Возможности
+
+- **Convert between many file formats** — конвертация между множеством форматов
+- **OCR for PDFs and images** — распознавание текста для PDF и изображений
+- **Audio & Video transcription** — транскрибация аудио и видео (MP4, MKV, AVI, MOV и др.)
+- **Speaker diarization** — автоматическое определение разных собеседников (требует pyannote.audio)
+- Simple, responsive dark UI with drag-and-drop
+- Background job processing with real-time status updates
+- `/settings` page for configuring tools and OAuth
+- CPU-only by default; GPU acceleration available
 
 ---
 
-## Features
-- Convert between many file formats; extendable via `settings.yml` to add any CLI tool.
-- OCR for PDFs and images (`tesseract` / `ocrmypdf`).
-- **Audio & Video transcription** using Whisper models (supports MP4, MKV, AVI, MOV, and more).
-- **Speaker diarization** - automatically identify different speakers in conversations (optional, requires pyannote.audio).
-- Simple, responsive dark UI with drag-and-drop and file picker.
-- Background job processing with real-time status updates and persistent history.
-- `/settings` page for configuring conversion tools and OAuth (runs without auth in local mode).
-- CPU-only by default; GPU acceleration available for supported hardware.
+## Installation / Установка
 
-## Security
-**Warning:** exposing this app publicly without authentication risks arbitrary code execution. Intended for local use or behind a properly configured OAuth/OIDC provider.
-
-#### Tech stack
-FastAPI, vanilla HTML/JS/CSS frontend.
-
-## Installation
-
-### Quick Start — Windows Native
+### Quick Start — Windows
 
 ```powershell
 # Clone this repository
 git clone https://github.com/akron2/filewizard-win.git
 cd filewizard-win
 
-# Python 3.10-3.12 recommended (3.13+ may have compatibility issues)
+# Python 3.10-3.12 recommended (3.13+ may have compatibility issues with some packages)
 python --version
 
 # Create and activate virtual environment
@@ -48,7 +43,8 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 .\venv\Scripts\Activate.ps1
 
-# Install dependencies (Windows-compatible)
+# Install dependencies
+pip install --upgrade pip
 pip install -r requirements_windows.txt
 
 # Run the application
@@ -57,43 +53,130 @@ pip install -r requirements_windows.txt
 
 Open http://localhost:8000 in your browser.
 
-### Original Repository
+---
 
-This is a Windows-compatible fork. For the original Linux/Docker-focused version, see:
-https://github.com/LoredCast/filewizard
+## External Tools / Внешние инструменты
 
-## Configuration & docs
+For full functionality, install these tools:
 
-- **Windows Setup:** See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for detailed installation guide
-- **Original Wiki:** https://github.com/LoredCast/filewizard/wiki (for conversion tools reference)
+### Via Chocolatey (recommended)
+```powershell
+# Install Chocolatey (run PowerShell as Administrator)
+Set-ExecutionPolicy Bypass -Scope Process -Force
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
-## Usage
-1. Open `http://127.0.0.1:8000`.
-2. Drag & drop or choose files.
-3. Select action: Convert, OCR, or Transcribe.
-4. Track job progress in the History table (updates automatically).
+# Install tools
+choco install ffmpeg
+choco install tesseract
+choco install libreeoffice
+choco install pandoc
+choco install poppler
+choco install pkgconfiglite  # for html5_parser
+```
 
-## Tools Table
-
-| Tool | Common inputs (extensions / format names) | Common outputs (extensions / format names) | Notes |
-|---|---|---|---|
-| **LibreOffice (soffice)** | `.odt`, `.fodt`, `.ott`, `.doc`, `.docx`, `.docm`, `.dot`, `.dotx`, `.rtf`, `.txt`, `.html/.htm/.xhtml`, `.xml`, `.sxw`, `.wps`, `.wpd`, `.abw`, `.pdb`, `.epub`, `.fb2`, `.lit`, `.lrf`, `.pages`, `.csv`, `.tsv`, `.xls`, `.xlsx`, `.xlsm`, `.ods`, `.sxc`, `.123`, `.dbf`, `.fb2` | `.pdf`, `.pdfa`, `.odt`, `.fodt`, `.doc`, `.docx`, `.rtf`, `.txt`, `.html/.htm`, `.xhtml`, `.epub`, `.svg`, `.png`, `.jpg/.jpeg`, `.pptx`, `.ppt`, `.odp`, `.xls`, `.xlsx`, `.ods`, `.csv`, `.dbf`, `.pdb`, `.fb2` | Good for office/document conversions; fidelity varies with complex layouts. |
-| **Pandoc** | Markdown flavors (`.md`, `.markdown`), `.html/.htm`, LaTeX (`.tex`), `.rst`, `.docx`, `.odt`, `.epub`, `.ipynb`, `.opml`, `.adoc`/asciidoc, `.tex`, `.bib`/citation inputs | `.html/.html5`, `.xhtml`, `.latex/.tex`, `.pdf` (via LaTeX engine), `.docx`, `.odt`, `.epub`, `.md` (flavors), `.gfm`, `.rst`, `.pptx`, `.man`, `.mediawiki`, `.docbook` | Highly configurable via templates/filters; requires LaTeX for PDF output. |
-| **Ghostscript (gs)** | `.ps`, `.eps`, `.pdf`, PostScript streams | `.pdf` (various compat levels incl PDF/A), `.ps`, `.eps`, raster images (`.png`, `.jpg`, `.tiff`, `.bmp`, `.pnm`) | Useful for PDF manipulations, rasterization, and producing PDF/A. |
-| **Calibre (ebook-convert)** | `.epub`, `.mobi`, `.azw3`, `.azw`, `.fb2`, `.html`, `.docx`, `.doc`, `.rtf`, `.txt`, `.pdb`, `.lit`, `.tcr`, `.cbz`, `.cbr`, `.odt`, `.pdf` (input with caveats) | `.epub`, `.mobi` (legacy), `.azw3`, `.pdf`, `.docx`, `.rtf`, `.txt`, `.fb2`, `.htmlz`, `.pdb`, `.lrf`, `.lit`, `.tcr`, `.cbz`, `.cbr` | Excellent for ebook format conversions and metadata handling; PDF input/output fidelity varies. |
-| **FFmpeg** | Containers & codecs: `.mp4`, `.mkv`, `.mov`, `.avi`, `.webm`, `.flv`, `.wmv`, `.mpg/.mpeg`, `.ts`, `.m2ts`, `.3gp`, audio: `.mp3`, `.wav`, `.aac/.m4a`, `.flac`, `.ogg`, `.opus`, image sequences (`.png`, `.jpg`, `.tiff`) | Wide set: `.mp4`, `.mkv`, `.mov`, `.webm`, `.avi`, `.flv`, `.mp3`, `.aac/.m4a`, `.wav`, `.flac`, `.ogg`, `.opus`, `.gif` (animated), `.ts`, elementary streams, many codec/container combos | Extremely versatile - audio/video transcoding, extraction, container changes, filters. Supported formats depend on build flags and linked libraries. |
-| **libvips (vips)** | `.jpg/.jpeg`, `.png`, `.tif/.tiff`, `.webp`, `.avif`, `.heif/.heic`, `.jp2`, `.gif` (frames), `.pnm`, `.fits`, `.exr`, PDF (via poppler delegate) | `.jpg/.jpeg`, `.png`, `.tif/.tiff`, `.webp`, `.avif`, `.heif`, `.jp2`, `.pnm`, `.v` (VIPS native), `.fits`, `.exr` | Fast, memory-efficient image processing; great for large images and tiling. |
-| **GraphicsMagick (gm)** | `.jpg/.jpeg`, `.png`, `.gif`, `.tif/.tiff`, `.bmp`, `.ico`, `.eps`, `.pdf` (via Ghostscript/poppler), `.dpx`, `.pnm`, `.svg` (if delegate), `.webp` (if built), `.exr` | `.jpg/.jpeg`, `.png`, `.webp` (if enabled), `.tif/.tiff`, `.gif`, `.bmp`, `.pdf` (from images), `.eps`, `.ico`, `.xpm`, `.dpx` | Similar to ImageMagick but with different performance/behavior; supported formats depend on build/delegates. |
-| **ImageMagick (convert / magick)** | Same as GraphicsMagick (large set; many delegates) | Same as GraphicsMagick | Often used interchangeably; watch for security considerations when processing untrusted images. |
-| **Inkscape** | `.svg/.svgz`, `.pdf`, `.eps`, `.ps`, `.ai` (legacy imports), `.dxf`, raster images (`.png`, `.jpg`, `.jpeg`, `.gif`, `.tiff`, `.bmp`) | `.svg`, `.pdf`, `.ps`, `.eps`, `.png`, `.emf`, `.wmf`, `.xaml`, `.dxf`, `.eps` | Vector editing and export; CLI useful for batch SVG → PNG/PDF conversions. |
-| **libjxl (cjxl / djxl)** | Raster inputs: `.png`, `.jpg/.jpeg`, `.ppm/.pbm/.pgm`, `.gif`, etc. | `.jxl` (JPEG XL) | Encoder/decoder for JPEG XL; availability depends on build. |
-| **resvg** | `.svg/.svgz` | `.png` (raster) | Fast, accurate SVG renderer — good for SVG→PNG conversion. |
-| **Potrace** | Bitmaps: `.pbm`, `.pgm`, `.ppm` (PNM family), `.bmp` (via conversion) | Vector: `.svg`, `.pdf`, `.eps`, `.ps`, `.dxf`, `.geojson` | Traces bitmaps to vector paths; often used with pre-conversion steps. |
-| **MarkItDown / markitdown** | `.pdf`, `.docx`, `.doc`, `.pptx`, `.ppt`, `.xlsx`, `.xls`, `.html`, `.eml`, `.msg`, `.md`, `.txt`, images, `.epub` | `.md` (Markdown) | Utility to extract/produce Markdown from various formats; implementation details vary. |
-| **pngquant** | `.png` (truecolor/rgba) | `.png` (quantized palette PNG) | Lossy PNG quantization for smaller PNGs. |
-| **MozJPEG (cjpeg, jpegtran)** | `.ppm/.pbm/.pgm` (PNM), `.bmp`, existing `.jpg` | `.jpg/.jpeg` (MozJPEG-optimized) | Produces smaller JPEGs with improved compression; good for recompression. |
-| **SoX (Sound eXchange)** | `.wav`, `.aiff`, `.mp3` (if libmp3lame), `.flac`, `.ogg/.oga`, `.raw`, `.au`, `.voc`, `.w64`, `.gsm`, `.amr`, `.m4a` (if libs present) | `.wav`, `.aiff`, `.flac`, `.mp3`, `.ogg`, `.raw`, `.w64`, `.opus`, `.amr`, `.m4a` | Audio processing, normalization, effects; exact formats depend on linked libraries. |
-| **Tesseract OCR / ocrmypdf** | Image formats (`.png`, `.jpg`, `.jpeg`, `.tiff`), PDFs (image PDFs) | Plain text (`.txt`), searchable PDF (PDF with text layer), HOCR, ALTO XML | OCR engine; language/training data required for best accuracy. `ocrmypdf` is a wrapper for PDF workflows. |
-| **faster-whisper / OpenAI Whisper (local)** | Audio: `.mp3`, `.wav`, `.m4a`, `.flac`, `.ogg`, `.opus`, `.aac` | Plain text transcripts (`.txt`), `.srt`, `.vtt`, other subtitle formats | Local Whisper implementations for speech-to-text. Models and speed depend on CPU/GPU and model variant. |
+### Manual Installation
+- **Tesseract OCR:** https://github.com/UB-Mannheim/tesseract/wiki
+- **FFmpeg:** https://ffmpeg.org/download.html
+- **LibreOffice:** https://www.libreoffice.org/download/
+- **Pandoc:** https://pandoc.org/installing.html
+- **Poppler:** https://github.com/oschwartz10612/poppler-windows/releases
 
 ---
+
+## Speaker Diarization / Разделение по спикерам
+
+Speaker diarization automatically identifies different speakers in conversations.
+
+### First-time Setup
+
+When you first use diarization:
+1. The app will automatically open Hugging Face pages in your browser
+2. Log in (or create account)
+3. Click "Accept" on model pages:
+   - https://huggingface.co/pyannote/speaker-diarization-3.1
+   - https://huggingface.co/pyannote/segmentation-3.0
+4. Return to terminal and press Enter
+5. Models will download automatically (~500MB)
+
+### Usage
+- Enable "Identify Speakers (Diarization)" checkbox when transcribing
+- Output format:
+  ```
+  [SPEAKER_00]:
+  Hello, how are you?
+  
+  [SPEAKER_01]:
+  I'm fine, thank you!
+  ```
+
+---
+
+## Usage / Использование
+
+1. Open http://localhost:8000
+2. Drag & drop or select files
+3. Choose action: Convert, OCR, or Transcribe
+4. Track progress in History table
+
+---
+
+## Tools Table / Таблица инструментов
+
+| Tool | Input Formats | Output Formats | Notes |
+|------|---------------|----------------|-------|
+| **LibreOffice** | `.doc`, `.docx`, `.xls`, `.xlsx`, `.ppt`, `.pptx`, `.odt`, `.ods`, `.pdf`, `.rtf`, `.txt`, `.html`, `.csv` | `.pdf`, `.docx`, `.xlsx`, `.pptx`, `.odt`, `.html`, `.txt`, `.png`, `.jpg` | Office document conversion |
+| **Pandoc** | `.md`, `.html`, `.tex`, `.docx`, `.odt`, `.epub`, `.rst` | `.pdf`, `.docx`, `.html`, `.epub`, `.md`, `.tex`, `.pptx` | Document conversion, requires LaTeX for PDF |
+| **Ghostscript** | `.pdf`, `.ps`, `.eps` | `.pdf`, `.png`, `.jpg`, `.tiff` | PDF manipulation, rasterization |
+| **Calibre** | `.epub`, `.mobi`, `.azw3`, `.fb2`, `.docx`, `.pdf`, `.html` | `.epub`, `.mobi`, `.azw3`, `.pdf`, `.docx`, `.txt` | E-book format conversion |
+| **FFmpeg** | `.mp4`, `.mkv`, `.avi`, `.mov`, `.webm`, `.mp3`, `.wav`, `.flac`, `.aac` | `.mp4`, `.mkv`, `.avi`, `.mp3`, `.wav`, `.flac`, `.gif` | Audio/video transcoding |
+| **libvips** | `.jpg`, `.png`, `.tiff`, `.webp`, `.avif`, `.heif` | `.jpg`, `.png`, `.webp`, `.avif`, `.tiff` | Fast image processing |
+| **GraphicsMagick** | `.jpg`, `.png`, `.gif`, `.tiff`, `.bmp`, `.pdf` | `.jpg`, `.png`, `.gif`, `.tiff`, `.bmp`, `.pdf` | Image processing |
+| **ImageMagick** | `.jpg`, `.png`, `.gif`, `.tiff`, `.bmp`, `.svg` | `.jpg`, `.png`, `.gif`, `.tiff`, `.bmp`, `.svg` | Image processing |
+| **Inkscape** | `.svg`, `.pdf`, `.eps`, `.ai`, `.png` | `.svg`, `.pdf`, `.png`, `.eps` | Vector graphics |
+| **Tesseract OCR** | `.png`, `.jpg`, `.tiff`, `.pdf` (images) | `.txt`, `.pdf` (searchable) | Text recognition |
+| **faster-whisper** | `.mp3`, `.wav`, `.m4a`, `.flac`, `.ogg`, `.mp4`, `.mkv`, `.avi` | `.txt`, `.srt`, `.vtt` | Audio/video transcription |
+
+---
+
+## Troubleshooting / Решение проблем
+
+### PowerShell script execution blocked
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+### Error: "TesseractNotFoundError"
+```powershell
+choco install tesseract
+```
+
+### Error: "ffmpeg not found"
+```powershell
+choco install ffmpeg
+```
+
+### Port 8000 already in use
+Close previous instance or change port in run.bat.
+
+### Diarization not working
+1. Ensure pyannote.audio is installed: `pip install pyannote.audio pyannote.pipeline`
+2. Accept model terms on Hugging Face (see Speaker Diarization section)
+
+---
+
+## Security / Безопасность
+
+**Warning:** Exposing this app publicly without authentication risks arbitrary code execution. Intended for local use or behind OAuth/OIDC.
+
+---
+
+## Additional Information / Дополнительная информация
+
+- **Original Repository:** https://github.com/LoredCast/filewizard
+- **This Repository:** https://github.com/akron2/filewizard-win
+- **Issues:** https://github.com/akron2/filewizard-win/issues
+
+---
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/loredcast)
