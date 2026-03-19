@@ -93,15 +93,15 @@ except ImportError:
     PiperVoice = None
 
 # --- Optional Dependency Handling for torchcodec (audio decoding) ---
+# torchcodec is optional and may fail to load on Windows due to FFmpeg DLL issues
+# The application works fine without it, so we suppress all errors
 _TORCHCODEC_AVAILABLE = False
 try:
     import torchcodec
     _TORCHCODEC_AVAILABLE = True
-    logger.info("torchcodec is available for audio decoding")
-except ImportError:
-    logger.warning("torchcodec is not installed. Built-in audio decoding may fail on some formats.")
-except OSError as e:
-    logger.warning(f"torchcodec installed but failed to load: {e}. Built-in audio decoding may fail on some formats.")
+except (ImportError, OSError):
+    # torchcodec is optional - silently ignore failures
+    pass
 
 import wave
 import io
@@ -2639,8 +2639,7 @@ async def lifespan(app: FastAPI):
         logger.warning("piper-tts is not installed. Piper TTS features will be disabled. Install with: pip install piper-tts")
     if not shutil.which("kokoro-tts"):
         logger.warning("kokoro-tts command not found in PATH. Kokoro TTS features will be disabled.")
-    if not _TORCHCODEC_AVAILABLE:
-        logger.warning("torchcodec is not available. Built-in audio decoding may fail on some formats. Install with: pip install torchcodec")
+    # torchcodec is optional - no warning needed as it's silently handled
 
     ENV = os.environ.get('ENV', 'dev').lower()
     ALLOW_LOCAL_ONLY = os.environ.get('ALLOW_LOCAL_ONLY', 'false').lower() == 'true'
