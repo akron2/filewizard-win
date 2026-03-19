@@ -7,23 +7,38 @@ echo File Wizard - Windows Launcher
 echo ========================================
 echo.
 
-REM Check and download FFmpeg if not found
-where ffmpeg >nul 2>nul
-if errorlevel 1 (
+REM Check for FFmpeg in local folder first, then in system PATH
+set "FFMPEG_BIN="
+if exist ".\ffmpeg_temp\ffmpeg-*\bin\ffmpeg.exe" (
+    for /d %%i in (ffmpeg_temp\ffmpeg-*) do (
+        set "FFMPEG_BIN=%%~fi\bin"
+        goto :ffmpeg_found
+    )
+)
+:ffmpeg_found
+
+if not defined FFMPEG_BIN (
+    where ffmpeg >nul 2>nul
+    if not errorlevel 1 (
+        for %%i in (ffmpeg.exe) do set "FFMPEG_BIN=%%~$PATH:i"
+    )
+)
+
+if not defined FFMPEG_BIN (
     echo FFmpeg not found. Downloading...
     if not exist ".\ffmpeg_temp" mkdir ".\ffmpeg_temp"
     pushd ffmpeg_temp
-    
+
     REM Download FFmpeg (static build for Windows)
     echo Downloading FFmpeg...
     powershell -Command "Invoke-WebRequest -Uri 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip' -OutFile 'ffmpeg.zip'"
-    
+
     echo Extracting FFmpeg...
     powershell -Command "Expand-Archive -Path 'ffmpeg.zip' -DestinationPath '.' -Force"
-    
+
     REM Find the extracted folder (name varies by version)
     for /d %%i in (ffmpeg-*) do set "FFMPEG_DIR=%%i"
-    
+
     if defined FFMPEG_DIR (
         echo FFmpeg downloaded successfully.
         set "FFMPEG_BIN=%CD%\%FFMPEG_DIR%\bin"
@@ -31,13 +46,16 @@ if errorlevel 1 (
     ) else (
         echo WARNING: Failed to locate FFmpeg after extraction.
     )
-    
+
     popd
-) else (
-    for %%i in (ffmpeg.exe) do set "FFMPEG_BIN=%%~$PATH:i"
 )
 
-REM Load environment variables from .env file if it exists
+if defined FFMPEG_BIN (
+    echo FFmpeg found: %FFMPEG_BIN%
+    set "PATH=%FFMPEG_BIN%;%PATH%"
+)
+
+echo.
 if exist .env (
     echo Loading environment variables from .env...
     for /f "delims=" %%a in (.env) do (
