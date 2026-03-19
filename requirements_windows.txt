@@ -18,6 +18,12 @@ pypdf>=4.0.0
 opencv-python-headless>=4.9.0
 Pillow>=10.0.0
 
+# Speaker Diarization (optional, for transcription with speaker separation)
+# pyannote.audio>=3.0
+# pyannote.pipeline>=3.0
+# torch>=2.0.0
+# torchaudio>=2.0.0
+
 # Configuration & Utilities
 python-dotenv>=1.0.0
 werkzeug>=3.0.0

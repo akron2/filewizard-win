@@ -446,6 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (taskType === 'transcription') {
             options.model_size = transcriptionChoices.getValue(true);
             options.generate_timestamps = document.getElementById('main-timestamps-checkbox').checked;
+            options.use_diarization = document.getElementById('main-diarization-checkbox').checked;
         } else if (taskType === 'tts') {
             const selectedModel = ttsChoices.getValue(true);
             if (!selectedModel) return alert('Please select a voice model.');
@@ -539,6 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (action === 'transcription') {
             options.model_size = mainModelSizeSelect.value;
             options.generate_timestamps = document.getElementById('dialog-timestamps-checkbox').checked;
+            options.use_diarization = document.getElementById('dialog-diarization-checkbox').checked;
         } else if (action === 'tts') {
             const selectedModel = dialogTtsChoices.getValue(true);
             if (!selectedModel) return alert('Please select a voice model.');

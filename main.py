@@ -1395,7 +1395,11 @@ class SrtFormatter:
 
 # --- TASK RUNNERS ---
 @huey.task()
-def run_transcription_task(job_id: str, input_path_str: str, output_path_str: str, model_size: str, whisper_settings: dict, app_config: dict, base_url: str, generate_timestamps: bool = False):
+def run_transcription_task(
+    job_id: str, input_path_str: str, output_path_str: str, model_size: str,
+    whisper_settings: dict, app_config: dict, base_url: str,
+    generate_timestamps: bool = False, use_diarization: bool = False
+):
     db = SessionLocal()
     input_path = Path(input_path_str)
     output_path = Path(output_path_str)
@@ -1422,6 +1426,17 @@ def run_transcription_task(job_id: str, input_path_str: str, output_path_str: st
             if not ffmpeg_path:
                 raise RuntimeError("FFmpeg is required for video transcription but was not found. Please install FFmpeg and add it to your PATH.")
             logger.info(f"Video file detected, FFmpeg found at: {ffmpeg_path}")
+
+        # Check diarization availability
+        if use_diarization:
+            try:
+                from diarization import is_diarization_available
+                if not is_diarization_available():
+                    logger.warning("Diarization requested but pyannote.audio is not installed. Falling back to regular transcription.")
+                    use_diarization = False
+            except Exception as e:
+                logger.warning(f"Diarization not available: {e}. Falling back to regular transcription.")
+                use_diarization = False
 
         model = get_whisper_model(model_size, whisper_settings)
         logger.info(f"Starting transcription for job {job_id} with model '{model_size}'")
@@ -1499,6 +1514,49 @@ def run_transcription_task(job_id: str, input_path_str: str, output_path_str: st
                         if info.duration > 0:
                             progress = int((segment.end / info.duration) * 100)
                             update_job_status(db, job_id, "processing", progress=progress)
+
+        # Run diarization if requested
+        if use_diarization:
+            try:
+                update_job_status(db, job_id, "processing", progress=85, detail="Running speaker diarization...")
+                logger.info(f"Running diarization for job {job_id}")
+                
+                from diarization import run_diarization, merge_transcription_with_diarization, format_diarized_output
+                
+                # Get diarization segments
+                diarization_segments = run_diarization(str(input_path))
+                
+                # Merge with transcription
+                # Re-transcribe to get segments with timestamps
+                segments_generator, info = model.transcribe(str(input_path), beam_size=5)
+                transcription_segments = []
+                for segment in segments_generator:
+                    transcription_segments.append({
+                        "start": segment.start,
+                        "end": segment.end,
+                        "text": segment.text.strip()
+                    })
+                
+                # Merge
+                merged_segments = merge_transcription_with_diarization(
+                    transcription_segments, diarization_segments
+                )
+                
+                # Format output
+                output_format = "srt" if generate_timestamps else "txt"
+                formatted_output = format_diarized_output(merged_segments, output_format)
+                
+                # Write to output file
+                with tmp_output_path.open("w", encoding="utf-8") as f:
+                    f.write(formatted_output)
+                
+                # Create preview
+                preview_segments = [seg["text"] for seg in merged_segments[:10]]
+                logger.info(f"Diarization completed for job {job_id}")
+                
+            except Exception as e:
+                logger.error(f"Diarization failed for job {job_id}: {e}")
+                # Continue with regular transcription output
 
         tmp_output_path.replace(output_path)
 
@@ -2923,13 +2981,14 @@ async def finalize_upload(request: Request, payload: FinalizeUploadPayload, user
 async def submit_audio_transcription(
     request: Request, file: UploadFile = File(...), model_size: str = Form("base"),
     generate_timestamps: bool = Form(False),
+    use_diarization: bool = Form(False),
     db: Session = Depends(get_db), user: dict = Depends(require_user)
 ):
     # Audio and video formats (FFmpeg can extract audio from video)
     allowed_audio_exts = {".mp3", ".wav", ".m4a", ".flac", ".ogg", ".opus", ".aac", ".aiff", ".wma"}
     allowed_video_exts = {".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv", ".wmv", ".mpeg", ".mpg", ".3gp", ".m4v"}
     allowed_exts = allowed_audio_exts | allowed_video_exts
-    
+
     if not is_allowed_file(file.filename, allowed_exts):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid audio/video file type.")
 
@@ -2948,7 +3007,11 @@ async def submit_audio_transcription(
     job_data = JobCreate(id=job_id, user_id=user['sub'], task_type="transcription", original_filename=file.filename,
                          input_filepath=str(upload_path), input_filesize=input_size, processed_filepath=str(processed_path))
     new_job = create_job(db=db, job=job_data)
-    run_transcription_task(new_job.id, str(upload_path), str(processed_path), model_size, whisper_settings=whisper_config, app_config=APP_CONFIG, base_url=base_url, generate_timestamps=generate_timestamps)
+    run_transcription_task(
+        new_job.id, str(upload_path), str(processed_path), model_size,
+        whisper_settings=whisper_config, app_config=APP_CONFIG, base_url=base_url,
+        generate_timestamps=generate_timestamps, use_diarization=use_diarization
+    )
     return {"job_id": new_job.id, "status": new_job.status, "status_url": f"/job/{new_job.id}"}
 
 @app.post("/convert-file", status_code=status.HTTP_202_ACCEPTED)

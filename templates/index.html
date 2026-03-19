@@ -85,6 +85,12 @@
                                         <span>Generate Timestamps</span>
                                     </label>
                                 </div>
+                                <div class="form-control">
+                                    <label class="checkbox-label" for="main-diarization-checkbox">
+                                        <input type="checkbox" id="main-diarization-checkbox" name="diarization">
+                                        <span>Identify Speakers (Diarization)</span>
+                                    </label>
+                                </div>
                                 <button type="button" id="start-transcription-btn" class="main-action-button">Start Transcription</button>
                             </fieldset>
 
@@ -145,6 +151,12 @@
                     <label class="checkbox-label" for="dialog-timestamps-checkbox">
                         <input type="checkbox" id="dialog-timestamps-checkbox" name="timestamps">
                         <span>Generate Timestamps</span>
+                    </label>
+                </div>
+                <div class="form-control">
+                    <label class="checkbox-label" for="dialog-diarization-checkbox">
+                        <input type="checkbox" id="dialog-diarization-checkbox" name="diarization">
+                        <span>Identify Speakers (Diarization)</span>
                     </label>
                 </div>
                 <button id="dialog-action-tts">Synthesize Speech</button>

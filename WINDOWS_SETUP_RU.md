@@ -72,6 +72,21 @@ choco install pkgconfiglite  # для html5_parser
 
 После установки добавьте пути к инструментам в системную переменную PATH.
 
+### Опционально: Разделение по спикерам
+
+Для включения определения собеседников (диаризация):
+
+```powershell
+# Установите pyannote.audio для диаризации
+pip install pyannote.audio pyannote.pipeline
+
+# Примечание: может потребоваться токен Hugging Face
+# Получить токен: https://huggingface.co/settings/tokens
+```
+
+Затем примите условия использования моделей:
+- https://huggingface.co/pyannote/speaker-diarization-3.1
+
 ### 3. Настройка окружения
 
 Скопируйте файл окружения:
