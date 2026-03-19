@@ -9,10 +9,15 @@ echo.
 
 REM Check for FFmpeg in local folder first, then in system PATH
 set "FFMPEG_BIN="
-if exist ".\ffmpeg_temp\ffmpeg-*\bin\ffmpeg.exe" (
-    for /d %%i in (ffmpeg_temp\ffmpeg-*) do (
-        set "FFMPEG_BIN=%%~fi\bin"
-        goto :ffmpeg_found
+if exist ".\ffmpeg_temp" (
+    dir /b /ad ".\ffmpeg_temp" | findstr /r "^ffmpeg-" >nul 2>nul
+    if not errorlevel 1 (
+        for /d %%i in (ffmpeg_temp\ffmpeg-*) do (
+            if exist "%%i\bin\ffmpeg.exe" (
+                set "FFMPEG_BIN=%%~fi\bin"
+                goto :ffmpeg_found
+            )
+        )
     )
 )
 :ffmpeg_found
@@ -37,7 +42,11 @@ if not defined FFMPEG_BIN (
     powershell -Command "Expand-Archive -Path 'ffmpeg.zip' -DestinationPath '.' -Force"
 
     REM Find the extracted folder (name varies by version)
-    for /d %%i in (ffmpeg-*) do set "FFMPEG_DIR=%%i"
+    for /d %%i in (ffmpeg-*) do (
+        if exist "%%i\bin\ffmpeg.exe" (
+            set "FFMPEG_DIR=%%i"
+        )
+    )
 
     if defined FFMPEG_DIR (
         echo FFmpeg downloaded successfully.
@@ -56,6 +65,8 @@ if defined FFMPEG_BIN (
 )
 
 echo.
+
+REM Load environment variables from .env file if it exists
 if exist .env (
     echo Loading environment variables from .env...
     for /f "delims=" %%a in (.env) do (
@@ -108,8 +119,7 @@ echo.
 echo Press Ctrl+C to stop the server.
 echo.
 
-REM Set PATH to include FFmpeg
-if defined FFMPEG_BIN set "PATH=%FFMPEG_BIN%;%PATH%"
-
-REM Start Uvicorn and Huey in the same process using Python script
-python -c "import threading, os, sys; from main import huey; from huey.consumer import Consumer; threading.Thread(target=lambda: Consumer(huey, workers=4).run(), daemon=True).start(); import uvicorn; uvicorn.run('main:app', host='0.0.0.0', port=8000, reload=False)"
+REM Start Huey consumer in background, then Uvicorn in foreground
+start /B python -c "from main import huey; from huey.consumer import Consumer; Consumer(huey, workers=4).run()"
+timeout /t 2 /nobreak >nul
+python -m uvicorn main:app --host 0.0.0.0 --port 8000
