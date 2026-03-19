@@ -15,10 +15,15 @@ import cv2
 import numpy as np
 import secrets
 import hashlib
+import warnings
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Dict, List, Any, Optional
+
+# Suppress torchcodec warnings (torchcodec is optional and may fail on Windows)
+warnings.filterwarnings("ignore", message=".*Could not load libtorchcodec.*")
+warnings.filterwarnings("ignore", message=".*FFmpeg version.*")
 try:
     import resource  # Unix-only
 except ImportError:
