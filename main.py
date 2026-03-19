@@ -15,15 +15,10 @@ import cv2
 import numpy as np
 import secrets
 import hashlib
-import warnings
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Dict, List, Any, Optional
-
-# Suppress torchcodec warnings (torchcodec may fail to load FFmpeg DLLs on Windows)
-warnings.filterwarnings("ignore", message=".*Could not load libtorchcodec.*")
-warnings.filterwarnings("ignore", message=".*FFmpeg version.*")
 try:
     import resource  # Unix-only
 except ImportError:
@@ -98,15 +93,15 @@ except ImportError:
     PiperVoice = None
 
 # --- Optional Dependency Handling for torchcodec (audio decoding) ---
-# torchcodec is required for speaker diarization (pyannote.audio)
-# FFmpeg DLLs are provided by run.bat and added to PATH before Python starts
+# torchcodec is disabled on Windows due to Python version compatibility issues
+# torchcodec only supports Python 3.11, but users may use Python 3.12/3.13
+# The application uses faster-whisper's built-in audio decoding instead
 _TORCHCODEC_AVAILABLE = False
 try:
     import torchcodec
     _TORCHCODEC_AVAILABLE = True
 except (ImportError, OSError, RuntimeError):
-    # torchcodec may fail to load if FFmpeg DLLs are not available
-    # This is expected on some Windows configurations
+    # torchcodec is disabled - silently ignore failures
     pass
 
 import wave
@@ -2645,8 +2640,8 @@ async def lifespan(app: FastAPI):
         logger.warning("piper-tts is not installed. Piper TTS features will be disabled. Install with: pip install piper-tts")
     if not shutil.which("kokoro-tts"):
         logger.warning("kokoro-tts command not found in PATH. Kokoro TTS features will be disabled.")
-    # torchcodec is required for speaker diarization (pyannote.audio)
-    # FFmpeg DLLs are provided by run.bat and added to PATH before Python starts
+    # torchcodec is disabled on Windows due to Python version compatibility issues
+    # The application uses faster-whisper's built-in audio decoding instead
 
     ENV = os.environ.get('ENV', 'dev').lower()
     ALLOW_LOCAL_ONLY = os.environ.get('ALLOW_LOCAL_ONLY', 'false').lower() == 'true'
