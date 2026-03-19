@@ -6,13 +6,11 @@
 
 > **🇷🇺 Русская версия:** [README_RU.md](README_RU.md)
 
-A self-hosted, browser-based utility for file conversion, OCR and audio transcription. It wraps common CLI and Python converters (FFmpeg, LibreOffice, Pandoc, ImageMagick, etc.), plus `faster-whisper` and Tesseract OCR.
+A self-hosted, browser-based utility for file conversion, OCR and audio/video transcription. It wraps common CLI and Python converters (FFmpeg, LibreOffice, Pandoc, ImageMagick, etc.), plus `faster-whisper` and Tesseract OCR.
 
 ![Screenshot](screenshot.png)
 
-> **💡 Windows Users:** See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for detailed Windows installation instructions. Quick start: run `.\run.bat` after installing dependencies.
-
-> **🐳 Docker:** See [DOCKER_WINDOWS.md](DOCKER_WINDOWS.md) for Docker setup on Windows.
+> **💡 Windows Users:** See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for detailed installation instructions. Quick start: run `.\run.bat` after installing dependencies.
 
 ---
 
@@ -23,7 +21,7 @@ A self-hosted, browser-based utility for file conversion, OCR and audio transcri
 - Simple, responsive dark UI with drag-and-drop and file picker.
 - Background job processing with real-time status updates and persistent history.
 - `/settings` page for configuring conversion tools and OAuth (runs without auth in local mode).
-- CPU-only by default; a `-cuda` image is available for GPU use.
+- CPU-only by default; GPU acceleration available for supported hardware.
 
 ## Security
 **Warning:** exposing this app publicly without authentication risks arbitrary code execution. Intended for local use or behind a properly configured OAuth/OIDC provider.
@@ -60,15 +58,6 @@ pip install -r requirements_windows.txt
 
 Open http://localhost:8000 in your browser.
 
-### Docker on Windows
-
-See [DOCKER_WINDOWS.md](DOCKER_WINDOWS.md) for detailed Docker Desktop setup.
-
-```powershell
-# Build and run (recommended for latest version)
-docker compose up -d --build
-```
-
 ### Original Repository
 
 This is a Windows-compatible fork. For the original Linux/Docker-focused version, see:
@@ -77,7 +66,6 @@ https://github.com/LoredCast/filewizard
 ## Configuration & docs
 
 - **Windows Setup:** See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for detailed installation guide
-- **Docker on Windows:** See [DOCKER_WINDOWS.md](DOCKER_WINDOWS.md) for Docker Desktop setup
 - **Original Wiki:** https://github.com/LoredCast/filewizard/wiki (for conversion tools reference)
 
 ## Usage
@@ -102,7 +90,6 @@ https://github.com/LoredCast/filewizard
 | **libjxl (cjxl / djxl)** | Raster inputs: `.png`, `.jpg/.jpeg`, `.ppm/.pbm/.pgm`, `.gif`, etc. | `.jxl` (JPEG XL) | Encoder/decoder for JPEG XL; availability depends on build. |
 | **resvg** | `.svg/.svgz` | `.png` (raster) | Fast, accurate SVG renderer — good for SVG→PNG conversion. |
 | **Potrace** | Bitmaps: `.pbm`, `.pgm`, `.ppm` (PNM family), `.bmp` (via conversion) | Vector: `.svg`, `.pdf`, `.eps`, `.ps`, `.dxf`, `.geojson` | Traces bitmaps to vector paths; often used with pre-conversion steps. |
-| **Potrace GUI / autotrace alternatives** | — | — | Not included but sometimes available in toolchains; behavior varies. |
 | **MarkItDown / markitdown** | `.pdf`, `.docx`, `.doc`, `.pptx`, `.ppt`, `.xlsx`, `.xls`, `.html`, `.eml`, `.msg`, `.md`, `.txt`, images, `.epub` | `.md` (Markdown) | Utility to extract/produce Markdown from various formats; implementation details vary. |
 | **pngquant** | `.png` (truecolor/rgba) | `.png` (quantized palette PNG) | Lossy PNG quantization for smaller PNGs. |
 | **MozJPEG (cjpeg, jpegtran)** | `.ppm/.pbm/.pgm` (PNM), `.bmp`, existing `.jpg` | `.jpg/.jpeg` (MozJPEG-optimized) | Produces smaller JPEGs with improved compression; good for recompression. |

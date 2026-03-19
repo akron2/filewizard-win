@@ -8,7 +8,7 @@
 
 #### Python и виртуальное окружение
 ```powershell
-# Убедитесь, что Python 3.10+ установлен
+# Убедитесь, что Python 3.10-3.12 установлен (3.13+ может иметь проблемы совместимости)
 python --version
 
 # Создайте виртуальное окружение
@@ -28,20 +28,20 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 #### Установка Python-зависимостей
 
-**Вариант 1: Основная установка (рекомендуется)**
+**Основная установка (рекомендуется)**
 ```powershell
 pip install --upgrade pip
 pip install -r requirements_windows.txt
 ```
 
-**Вариант 2: Если нужен html5_parser**
+**Опционально: Если нужен html5_parser**
 ```powershell
 # Установите pkg-config через Chocolatey
 choco install pkgconfiglite
 
 # Затем установите зависимости
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r requirements_windows.txt
 ```
 
 ### 2. Установка внешних инструментов (опционально)
@@ -83,31 +83,11 @@ copy .env.example .env
 
 ### 4. Запуск приложения
 
-#### Вариант 1: Batch-скрипт (рекомендуется)
 ```powershell
 .\run.bat
 ```
 
-#### Вариант 2: PowerShell-скрипт
-```powershell
-.\run.ps1
-```
-
-#### Вариант 3: Ручной запуск
-```powershell
-# В одном окне терминала запустите веб-сервер
-python -m uvicorn main:app --host 0.0.0.0 --port 8000
-
-# В другом окне запустите worker задач
-python -m huey_consumer main.huey -w 4
-```
-
-### 5. Доступ к приложению
-
-Откройте браузер и перейдите по адресу:
-```
-http://localhost:8000
-```
+Откройте http://localhost:8000 в браузере.
 
 ## Устранение проблем
 
@@ -132,17 +112,18 @@ choco install ffmpeg
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-### Проблемы с CUDA/GPU
+### CUDA/GPU проблемы
 Для работы с CUDA на Windows:
 1. Установите NVIDIA драйверы
 2. Установите CUDA Toolkit
 3. Используйте `requirements_cuda.txt` вместо `requirements.txt`
 
+### Порт 8000 уже занят
+Закройте предыдущий экземпляр или измените порт в run.bat.
+
 ## Остановка приложения
 
-- При использовании `.bat` или `.ps1`: нажмите `Ctrl+C` в окне терминала
-- Веб-сервер остановится автоматически при закрытии окна
-- Worker задач остановится при нажатии `Ctrl+C`
+Нажмите `Ctrl+C` в окне терминала для остановки сервера.
 
 ## Дополнительная информация
 

@@ -8,7 +8,7 @@
 
 #### Python and Virtual Environment
 ```powershell
-# Make sure Python 3.10+ is installed
+# Make sure Python 3.10-3.12 is installed (3.13+ may have compatibility issues)
 python --version
 
 # Create virtual environment
@@ -28,20 +28,20 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 #### Install Python Dependencies
 
-**Option 1: Standard installation (recommended)**
+**Standard installation (recommended)**
 ```powershell
 pip install --upgrade pip
 pip install -r requirements_windows.txt
 ```
 
-**Option 2: If you need html5_parser**
+**Optional: If you need html5_parser**
 ```powershell
 # Install pkg-config via Chocolatey
 choco install pkgconfiglite
 
 # Then install dependencies
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r requirements_windows.txt
 ```
 
 ### 2. Install External Tools (Optional)
@@ -83,31 +83,11 @@ Edit the `.env` file if needed.
 
 ### 4. Run the Application
 
-#### Option 1: Batch script (recommended)
 ```powershell
 .\run.bat
 ```
 
-#### Option 2: PowerShell script
-```powershell
-.\run.ps1
-```
-
-#### Option 3: Manual start
-```powershell
-# In one terminal window, start the web server
-python -m uvicorn main:app --host 0.0.0.0 --port 8000
-
-# In another window, start the task worker
-python -m huey_consumer main.huey -w 4
-```
-
-### 5. Access the Application
-
-Open your browser and go to:
-```
-http://localhost:8000
-```
+Open http://localhost:8000 in your browser.
 
 ## Troubleshooting
 
@@ -138,11 +118,12 @@ For CUDA support on Windows:
 2. Install CUDA Toolkit
 3. Use `requirements_cuda.txt` instead of `requirements.txt`
 
+### Port 8000 already in use
+Close the previous instance or change the port in run.bat.
+
 ## Stopping the Application
 
-- When using `.bat` or `.ps1`: press `Ctrl+C` in the terminal window
-- The web server will stop automatically when you close the window
-- The task worker will stop when you press `Ctrl+C`
+Press `Ctrl+C` in the terminal window to stop the server.
 
 ## Additional Information
 

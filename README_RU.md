@@ -6,13 +6,11 @@
 
 > **🇬🇧 English version:** [README.md](README.md)
 
-Веб-утилита для конвертации файлов, OCR и транскрибации аудио. Поддерживает FFmpeg, LibreOffice, Pandoc, ImageMagick, `faster-whisper` и Tesseract OCR.
+Веб-утилита для конвертации файлов, OCR и транскрибации аудио/видео. Поддерживает FFmpeg, LibreOffice, Pandoc, ImageMagick, `faster-whisper` и Tesseract OCR.
 
 ![Screenshot](screenshot.png)
 
 > **💡 Для Windows:** Подробная инструкция в [WINDOWS_SETUP_RU.md](WINDOWS_SETUP_RU.md). Быстрый старт: запустите `.\run.bat` после установки зависимостей.
-
-> **🐳 Docker:** Настройка Docker на Windows в [DOCKER_WINDOWS_RU.md](DOCKER_WINDOWS_RU.md).
 
 ---
 
@@ -23,7 +21,7 @@
 - Простой тёмный интерфейс с drag-and-drop.
 - Фоновая обработка задач с обновлением статуса в реальном времени.
 - Страница `/settings` для настройки инструментов и OAuth.
-- Работа на CPU по умолчанию; есть поддержка CUDA для GPU.
+- Работа на CPU по умолчанию; доступна поддержка GPU.
 
 ## Безопасность
 **Внимание:** публикация этого приложения без аутентификации создаёт риск выполнения произвольного кода. Предназначен для локального использования или за обратным прокси с OAuth/OIDC.
@@ -60,15 +58,6 @@ pip install -r requirements_windows.txt
 
 Откройте http://localhost:8000 в браузере.
 
-### Docker на Windows
-
-См. [DOCKER_WINDOWS_RU.md](DOCKER_WINDOWS_RU.md) для подробной настройки Docker Desktop.
-
-```powershell
-# Сборка и запуск (рекомендуется для последней версии)
-docker compose up -d --build
-```
-
 ### Оригинальный репозиторий
 
 Это Windows-совместимая версия. Оригинальная Linux/Docker версия:
@@ -77,7 +66,6 @@ https://github.com/LoredCast/filewizard
 ## Документация
 
 - **Установка на Windows:** [WINDOWS_SETUP_RU.md](WINDOWS_SETUP_RU.md)
-- **Docker на Windows:** [DOCKER_WINDOWS_RU.md](DOCKER_WINDOWS_RU.md)
 - **Оригинальная Wiki:** https://github.com/LoredCast/filewizard/wiki
 
 ## Использование
@@ -100,7 +88,7 @@ https://github.com/LoredCast/filewizard
 | **ImageMagick** | `.jpg`, `.png`, `.gif`, `.tiff`, `.bmp`, `.svg` | `.jpg`, `.png`, `.gif`, `.tiff`, `.bmp`, `.svg` | Обработка изображений |
 | **Inkscape** | `.svg`, `.pdf`, `.eps`, `.ai`, `.png` | `.svg`, `.pdf`, `.png`, `.eps` | Векторная графика |
 | **Tesseract OCR** | `.png`, `.jpg`, `.tiff`, `.pdf` (изображения) | `.txt`, `.pdf` (с текстовым слоем) | Распознавание текста |
-| **faster-whisper** | `.mp3`, `.wav`, `.m4a`, `.flac`, `.ogg` | `.txt`, `.srt`, `.vtt` | Транскрибация аудио |
+| **faster-whisper** | `.mp3`, `.wav`, `.m4a`, `.flac`, `.ogg`, `.mp4`, `.mkv`, `.avi` | `.txt`, `.srt`, `.vtt` | Транскрибация аудио и видео |
 
 ---
 
