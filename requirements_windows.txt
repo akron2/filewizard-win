@@ -1,47 +1,47 @@
 # Web Framework & Server
-fastapi
-gunicorn
-uvicorn[standard]
-Jinja2
+fastapi>=0.109.0
+gunicorn>=21.0.0
+uvicorn[standard]>=0.27.0
+Jinja2>=3.1.0
 
 # Database & Task Queue
-SQLAlchemy
-huey
+SQLAlchemy>=2.0.0
+huey>=2.6.0
 
 # OCR & Transcription Features
-faster-whisper
-ocrmypdf
-pytesseract
-pypdf
-piper-tts
-kokoro-tts
-opencv-python-headless
-Pillow
+faster-whisper>=1.0.0
+ocrmypdf>=16.0.0
+pytesseract>=0.3.10
+pypdf>=4.0.0
+# piper-tts - may not be compatible with Python 3.13+
+# kokoro-tts - may not be compatible with Python 3.13+
+opencv-python-headless>=4.9.0
+Pillow>=10.0.0
 
 # Configuration & Utilities
-python-dotenv
-werkzeug
-itsdangerous
-authlib
-dotenv
-httpx
-PyYAML
-pydantic
-pydantic-settings
-python-multipart
-markitdown[pdf,docx,pptx,xlsx,outlook]==0.1.3
-PyPDF2==3.0.1
-mechanize
+python-dotenv>=1.0.0
+werkzeug>=3.0.0
+itsdangerous>=2.1.0
+authlib>=1.3.0
+dotenv>=0.9.9
+httpx>=0.27.0
+PyYAML>=6.0.0
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+python-multipart>=0.0.9
+markitdown[pdf,docx,pptx,xlsx,outlook]>=0.1.0
+PyPDF2>=3.0.0
+mechanize>=0.4.10
 # html5_parser - requires pkg-config on Windows, install separately if needed
-css_parser
+css_parser>=2.9.0
 #PyQt6==6.9.1 # uncomment for calibre, it uses the webengine
 #PyQt6-Qt6==6.9.2
 #PyQt6-WebEngine==6.9.0
 #PyQt6-WebEngine-Qt6==6.9.2
 
 # Security libraries
-bleach
+bleach>=6.1.0
 
-# Docling
---extra-index-url https://download.pytorch.org/whl/cpu
-docling
+# Docling (requires Python <3.13)
+# --extra-index-url https://download.pytorch.org/whl/cpu
+# docling

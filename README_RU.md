@@ -40,6 +40,9 @@ FastAPI, vanilla HTML/JS/CSS frontend.
 git clone https://github.com/akron2/filewizard-win.git
 cd filewizard-win
 
+# Рекомендуется Python 3.10-3.12 (3.13+ может иметь проблемы совместимости)
+python --version
+
 # Создать и активировать виртуальное окружение
 python -m venv venv
 
