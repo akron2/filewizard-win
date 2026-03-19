@@ -3,6 +3,8 @@ Speaker Diarization Module
 Separates audio by speakers using pyannote.audio
 """
 import logging
+import webbrowser
+import time
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
@@ -19,9 +21,45 @@ except ImportError:
     ProgressHook = None
 
 
+# Hugging Face model URLs for token acceptance
+HF_MODEL_ACCEPTANCE_URLS = [
+    "https://huggingface.co/pyannote/speaker-diarization-3.1",
+    "https://huggingface.co/pyannote/segmentation-3.0"
+]
+
+
 def is_diarization_available() -> bool:
     """Check if diarization is available"""
     return _HAS_PYANNOTE
+
+
+def _open_token_acceptance_pages():
+    """Open Hugging Face pages for model acceptance in browser"""
+    logger.info("Opening Hugging Face pages for model acceptance...")
+    print("\n" + "="*60)
+    print("ATTENTION: Speaker diarization requires accepting model terms")
+    print("="*60)
+    print("\nOpening Hugging Face pages in your browser...")
+    print("\nPlease:")
+    print("1. Log in to Hugging Face (create account if needed)")
+    print("2. Click 'Accept' on each model page")
+    print("3. Return here and press Enter to continue")
+    print("="*60 + "\n")
+    
+    # Open all model pages in browser
+    for url in HF_MODEL_ACCEPTANCE_URLS:
+        webbrowser.open(url)
+        time.sleep(0.5)  # Small delay between opens
+
+
+def _wait_for_user_confirmation():
+    """Wait for user to confirm they accepted terms"""
+    try:
+        input("Press Enter after you've accepted the terms on all pages...")
+        return True
+    except (EOFError, KeyboardInterrupt):
+        logger.warning("User cancelled token acceptance")
+        return False
 
 
 def run_diarization(
@@ -34,7 +72,7 @@ def run_diarization(
     
     Args:
         audio_path: Path to audio file
-        hf_token: Hugging Face token for pyannote models (optional, may be required)
+        hf_token: Hugging Face token (optional, will try auto-detection)
         progress_callback: Optional callback for progress updates
         
     Returns:
@@ -54,18 +92,72 @@ def run_diarization(
     logger.info(f"Starting diarization for: {audio_path}")
     
     try:
-        # Load pretrained pipeline
-        if hf_token:
+        # Try to load pipeline with auto-detected token
+        pipeline = None
+        token_used = hf_token
+        
+        # First attempt: try with provided token or auto-detect
+        try:
+            if hf_token:
+                logger.info("Using provided Hugging Face token")
+            else:
+                logger.info("Attempting to use auto-detected Hugging Face token")
+            
             pipeline = Pipeline.from_pretrained(
                 "pyannote/speaker-diarization-3.1",
                 use_auth_token=hf_token
             )
-        else:
-            # Try without token (may work for some models)
-            pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1")
+        except Exception as e:
+            error_msg = str(e)
+            logger.warning(f"Initial pipeline load failed: {e}")
+            
+            # Check if it's a token/acceptance issue
+            if "token" in error_msg.lower() or "accept" in error_msg.lower() or "gated" in error_msg.lower():
+                print("\n" + "="*60)
+                print("Hugging Face Token Required")
+                print("="*60)
+                print("\nThe pyannote models require you to accept usage terms.")
+                print("This is a one-time process.\n")
+                
+                # Open browser for acceptance
+                _open_token_acceptance_pages()
+                
+                # Wait for user confirmation
+                if _wait_for_user_confirmation():
+                    print("\nThank you! Retrying pipeline load...")
+                    logger.info("User confirmed token acceptance, retrying...")
+                    
+                    # Wait a moment for HF to propagate acceptance
+                    time.sleep(2)
+                    
+                    # Retry loading
+                    try:
+                        pipeline = Pipeline.from_pretrained(
+                            "pyannote/speaker-diarization-3.1"
+                        )
+                        print("Success! Models loaded.\n")
+                    except Exception as retry_error:
+                        logger.error(f"Retry failed: {retry_error}")
+                        raise RuntimeError(
+                            "Could not load pyannote models even after acceptance. "
+                            "Please ensure you're logged in to Hugging Face and "
+                            "have accepted the terms on the model pages."
+                        ) from retry_error
+                else:
+                    raise RuntimeError(
+                        "Diarization cancelled by user. "
+                        "To use speaker diarization, you need to accept the model "
+                        "terms on Hugging Face."
+                    )
+            else:
+                raise
+        
+        if pipeline is None:
+            raise RuntimeError("Failed to load pyannote pipeline")
         
         # Run diarization
         logger.info("Running speaker diarization...")
+        print("Processing audio with pyannote.audio...")
         diarization = pipeline(audio_path)
         
         # Convert to list of segments
@@ -79,6 +171,7 @@ def run_diarization(
             })
         
         logger.info(f"Diarization completed: {len(segments)} segments, {len(set(s['speaker'] for s in segments))} speakers")
+        print(f"✓ Found {len(set(s['speaker'] for s in segments))} speakers in {len(segments)} segments\n")
         return segments
         
     except Exception as e:
