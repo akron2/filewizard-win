@@ -99,7 +99,7 @@ _TORCHCODEC_AVAILABLE = False
 try:
     import torchcodec
     _TORCHCODEC_AVAILABLE = True
-except (ImportError, OSError):
+except (ImportError, OSError, RuntimeError):
     # torchcodec is optional - silently ignore failures
     pass
 
