@@ -31,10 +31,12 @@ FastAPI, vanilla HTML/JS/CSS frontend.
 ## Installation
 ### Recommended — Docker (pull from Docker Hub)
 
+> **⚠️ Note:** The pre-built image on Docker Hub may be outdated. For the latest version, build locally (see below).
+
 > **💡 Windows Users:** See [DOCKER_WINDOWS.md](DOCKER_WINDOWS.md) for detailed Docker setup on Windows.
 
 Images available:
-- `loredcast/filewizard:latest` (newest full release without cuda)
+- `loredcast/filewizard:latest` (newest full release without cuda) — **may be outdated**
 - `loredcast/filewizard:0.3-small` (omits TeX and other large tools)
 - `loredcast/filewizard:0.3-cuda` (CUDA-enabled)
 
@@ -66,42 +68,44 @@ volumes:
 Copy `docker-compose.yml` from the repo or the above, adjust as needed, then:
 
 ```bash
+# Build and run (recommended for latest version)
+docker compose up -d --build
+
+# Or use pre-built image (may be outdated)
 docker compose up -d
 ```
 FileWizard will be available at `localhost:6969`
 
-### Build locally with Docker (new build types)
+### Build locally with Docker
 
-For different build configurations, use the BUILD_TYPE argument:
+The docker-compose.yml is configured to build locally by default. To build manually:
 
 ```bash
 # Full build (includes all dependencies but no CUDA)
-docker build --build-arg BUILD_TYPE=full -t filewizard:full .
+docker build --target full-final -t filewizard:full .
 
-# Small build (excludes TeX and markitdown dependencies for smaller image)
-docker build --build-arg BUILD_TYPE=small -t filewizard:small .
+# Small build (excludes TeX and some large dependencies)
+docker build --target small-final -t filewizard:small .
 
 # CUDA build (includes CUDA support for GPU acceleration)
-docker build --build-arg BUILD_TYPE=cuda -t filewizard:cuda .
+docker build --target cuda-final -t filewizard:cuda .
 ```
 
 Or with docker-compose:
 
 ```bash
-# For full build
-docker compose build --build-arg BUILD_TYPE=full
+# Build and run
+docker compose up -d --build
 
-# For small build
-docker compose build --build-arg BUILD_TYPE=small
-
-# For CUDA build
-docker compose build --build-arg BUILD_TYPE=cuda
+# Rebuild without cache (if needed)
+docker compose build --no-cache
+docker compose up -d
 ```
 
 For CUDA builds, ensure you have:
 - NVIDIA Docker runtime installed (`nvidia-docker2` package)
 - Compatible GPU with appropriate drivers
-- Add the GPU configuration to docker-compose.yml if building with compose:
+- Add the GPU configuration to docker-compose.yml:
 ```yaml
     deploy:
       resources:

@@ -1,7 +1,10 @@
 version: "3.9"
 services:
   web:
-    image: loredcast/filewizard:latest
+    # Use pre-built image (may be outdated)
+    # image: loredcast/filewizard:latest
+    
+    # Build locally for the latest version (recommended)
     build:
       context: .
       target: full-final # Change to 'full-final' or 'small-final' as needed
