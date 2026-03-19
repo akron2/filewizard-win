@@ -12,6 +12,7 @@ A self-hosted, browser-based utility for file conversion, OCR and audio/video tr
 - OCR for PDFs and images (Tesseract / ocrmypdf)
 - Audio & Video transcription using Whisper (MP4, MKV, AVI, MOV, etc.)
 - Speaker diarization - automatically identify different speakers (requires pyannote.audio)
+- torchcodec for enhanced audio decoding (requires FFmpeg DLLs on Windows)
 - Simple, responsive dark UI with drag-and-drop
 - Background job processing with real-time status updates
 - `/settings` page for configuring tools and OAuth
@@ -158,6 +159,13 @@ Close previous instance or change port in run.bat.
 ### Diarization not working
 1. Ensure pyannote.audio is installed: `pip install pyannote.audio pyannote.pipeline`
 2. Accept model terms on Hugging Face (see Speaker Diarization section)
+
+### Audio decoding fails with torchcodec error
+If you see errors like `OSError: Could not load this library: ...torchcodec\libtorchcodec_core*.dll`:
+1. Ensure torchcodec is installed: `pip install torchcodec`
+2. If the error persists, torchcodec requires FFmpeg DLLs to be in PATH
+3. Add your FFmpeg bin directory to PATH: `set PATH=%PATH%;C:\path\to\ffmpeg\bin`
+4. Restart the application
 
 ---
 

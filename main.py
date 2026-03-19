@@ -92,6 +92,17 @@ except ImportError:
     VoiceNotFoundError = None
     PiperVoice = None
 
+# --- Optional Dependency Handling for torchcodec (audio decoding) ---
+_TORCHCODEC_AVAILABLE = False
+try:
+    import torchcodec
+    _TORCHCODEC_AVAILABLE = True
+    logger.info("torchcodec is available for audio decoding")
+except ImportError:
+    logger.warning("torchcodec is not installed. Built-in audio decoding may fail on some formats.")
+except OSError as e:
+    logger.warning(f"torchcodec installed but failed to load: {e}. Built-in audio decoding may fail on some formats.")
+
 import wave
 import io
 import mimetypes
@@ -2628,6 +2639,8 @@ async def lifespan(app: FastAPI):
         logger.warning("piper-tts is not installed. Piper TTS features will be disabled. Install with: pip install piper-tts")
     if not shutil.which("kokoro-tts"):
         logger.warning("kokoro-tts command not found in PATH. Kokoro TTS features will be disabled.")
+    if not _TORCHCODEC_AVAILABLE:
+        logger.warning("torchcodec is not available. Built-in audio decoding may fail on some formats. Install with: pip install torchcodec")
 
     ENV = os.environ.get('ENV', 'dev').lower()
     ALLOW_LOCAL_ONLY = os.environ.get('ALLOW_LOCAL_ONLY', 'false').lower() == 'true'

@@ -49,3 +49,8 @@ bleach>=6.1.0
 # Docling (requires Python <3.13)
 # --extra-index-url https://download.pytorch.org/whl/cpu
 # docling
+
+# Audio decoding (torchcodec for audio processing with faster-whisper/pyannote)
+# CPU-only version for Windows compatibility
+--extra-index-url https://download.pytorch.org/whl/cpu
+torchcodec>=0.2.0
