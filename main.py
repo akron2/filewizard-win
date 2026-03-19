@@ -605,6 +605,7 @@ class FinalizeUploadPayload(BaseModel):
     model_name: str = ""
     output_format: str = ""
     generate_timestamps: bool = False
+    use_diarization: bool = False
     callback_url: Optional[str] = None # For API chunked uploads
 
 class JobSelection(BaseModel):
@@ -2215,7 +2216,14 @@ def dispatch_single_file_job(original_filename: str, input_filepath: str, task_t
         processed_path = PATHS.PROCESSED_DIR / f"{Path(safe_filename).stem}_{job_id[:8]}{output_suffix}"
         job_data.processed_filepath = str(processed_path)
         create_job(db=db, job=job_data)
-        run_transcription_task(job_data.id, str(final_path), str(processed_path), options.get("model_size", "base"), app_config.get("transcription_settings", {}).get("whisper", {}), app_config, base_url, generate_timestamps=options.get('generate_timestamps', False))
+        run_transcription_task(
+            job_data.id, str(final_path), str(processed_path),
+            options.get("model_size", "base"),
+            app_config.get("transcription_settings", {}).get("whisper", {}),
+            app_config, base_url,
+            generate_timestamps=options.get('generate_timestamps', False),
+            use_diarization=options.get('use_diarization', False)
+        )
     elif task_type == "tts":
         tts_config = app_config.get("tts_settings", {})
         stem = Path(safe_filename).stem
@@ -2955,7 +2963,13 @@ async def finalize_upload(request: Request, payload: FinalizeUploadPayload, user
         unzip_and_dispatch_task(job_id, str(final_path), payload.task_type, sub_task_options, user, APP_CONFIG, base_url)
     else:
         # This is the logic for all other single-file uploads.
-        options = {"model_size": payload.model_size, "model_name": payload.model_name, "output_format": payload.output_format, "generate_timestamps": payload.generate_timestamps}
+        options = {
+            "model_size": payload.model_size,
+            "model_name": payload.model_name,
+            "output_format": payload.output_format,
+            "generate_timestamps": payload.generate_timestamps,
+            "use_diarization": payload.use_diarization
+        }
         dispatch_single_file_job(payload.original_filename, str(final_path), payload.task_type, user, db, APP_CONFIG, base_url, job_id=job_id, options=options)
 
     # --- FIX STARTS HERE ---
