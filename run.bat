@@ -12,7 +12,7 @@ where ffmpeg >nul 2>nul
 if errorlevel 1 (
     echo FFmpeg not found. Downloading...
     if not exist ".\ffmpeg_temp" mkdir ".\ffmpeg_temp"
-    cd ffmpeg_temp
+    pushd ffmpeg_temp
     
     REM Download FFmpeg (static build for Windows)
     echo Downloading FFmpeg...
@@ -26,36 +26,28 @@ if errorlevel 1 (
     
     if defined FFMPEG_DIR (
         echo FFmpeg downloaded successfully.
-        echo Adding FFmpeg to PATH for this session...
-        set "FFMPEG_PATH=%CD%\%FFMPEG_DIR%\bin"
-        set "PATH=%FFMPEG_PATH%;%PATH%"
-        echo FFmpeg is now available.
+        set "FFMPEG_BIN=%CD%\%FFMPEG_DIR%\bin"
+        echo FFmpeg path: %FFMPEG_BIN%
     ) else (
         echo WARNING: Failed to locate FFmpeg after extraction.
-        echo Please install FFmpeg manually or check your internet connection.
     )
     
-    cd ..
+    popd
 ) else (
-    for %%i in (ffmpeg.exe) do echo FFmpeg found: %%~$PATH:i
+    for %%i in (ffmpeg.exe) do set "FFMPEG_BIN=%%~$PATH:i"
 )
-
-echo.
 
 REM Load environment variables from .env file if it exists
 if exist .env (
     echo Loading environment variables from .env...
     for /f "delims=" %%a in (.env) do (
-        REM Skip empty lines and comments
         echo %%a | findstr /r /c:"^$" /c:"^#" >nul
         if errorlevel 1 (
             setlocal enabledelayedexpansion
             set "line=%%a"
-            REM Extract variable name and value
             for /f "tokens=1,* delims==" %%b in ("!line!") do (
                 set "varname=%%b"
                 set "varvalue=%%c"
-                REM Remove surrounding quotes if present
                 set "varvalue=!varvalue:"=!"
                 endlocal & set "!varname!=!varvalue!"
             )
@@ -68,7 +60,6 @@ if exist .env (
 REM Set default values if not already set
 if not defined SECRET_KEY (
     echo Generating random SECRET_KEY...
-    REM Use PowerShell to generate random hex
     for /f "delims=" %%i in ('powershell -Command "[System.BitConverter]::ToString((New-Object Security.Cryptography.SHA256Managed).ComputeHash([System.Text.Encoding]::UTF8.GetBytes([System.Guid]::NewGuid().ToString()))).Replace('-','').Substring(0,32)"') do set SECRET_KEY=%%i
 )
 
@@ -82,6 +73,7 @@ echo   UPLOADS_DIR=%UPLOADS_DIR%
 echo   PROCESSED_DIR=%PROCESSED_DIR%
 echo   CHUNK_TMP_DIR=%CHUNK_TMP_DIR%
 echo   LOCAL_ONLY=%LOCAL_ONLY%
+if defined FFMPEG_BIN echo   FFmpeg: %FFMPEG_BIN%
 echo.
 
 REM Create necessary directories
@@ -93,29 +85,13 @@ echo ========================================
 echo Starting File Wizard...
 echo ========================================
 echo.
-
-REM Start Uvicorn server in a separate process
-echo Starting Uvicorn web server on port 8000...
-start "FileWizard Web Server" cmd /k "set LOCAL_ONLY=%LOCAL_ONLY%& set SECRET_KEY=%SECRET_KEY%& set UPLOADS_DIR=%UPLOADS_DIR%& set PROCESSED_DIR=%PROCESSED_DIR%& set CHUNK_TMP_DIR=%CHUNK_TMP_DIR%& uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
-
-REM Wait a moment for server to start
-timeout /t 3 /nobreak >nul
-
-echo Starting Huey task queue worker...
-echo.
-echo ========================================
-echo File Wizard is starting...
 echo Web interface: http://localhost:8000
-echo ========================================
 echo.
-echo Press Ctrl+C to stop the Huey worker.
-echo The web server will continue running in a separate window.
+echo Press Ctrl+C to stop the server.
 echo.
 
-REM Start Huey consumer in the current process
-set LOCAL_ONLY=%LOCAL_ONLY%
-set SECRET_KEY=%SECRET_KEY%
-set UPLOADS_DIR=%UPLOADS_DIR%
-set PROCESSED_DIR=%PROCESSED_DIR%
-set CHUNK_TMP_DIR=%CHUNK_TMP_DIR%
-python -c "from main import huey; from huey.consumer import Consumer; Consumer(huey, workers=4).run()"
+REM Set PATH to include FFmpeg
+if defined FFMPEG_BIN set "PATH=%FFMPEG_BIN%;%PATH%"
+
+REM Start Uvicorn and Huey in the same process using Python script
+python -c "import threading, os, sys; from main import huey; from huey.consumer import Consumer; threading.Thread(target=lambda: Consumer(huey, workers=4).run(), daemon=True).start(); import uvicorn; uvicorn.run('main:app', host='0.0.0.0', port=8000, reload=False)"
