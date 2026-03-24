@@ -1,4 +1,4 @@
-__pycache__
+﻿__pycache__
 uploads
 processed
 venv
@@ -22,3 +22,11 @@ test_uploads
 uploads_data
 processed_data
 .vscode
+ffmpeg_temp/
+test_extract/
+*.zip
+*.whl
+*.wav
+*.txt
+*.log
+git_*
