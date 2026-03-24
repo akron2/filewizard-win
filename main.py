@@ -93,15 +93,17 @@ except ImportError:
     PiperVoice = None
 
 # --- Optional Dependency Handling for torchcodec (audio decoding) ---
-# torchcodec is disabled on Windows due to Python version compatibility issues
-# torchcodec only supports Python 3.11, but users may use Python 3.12/3.13
-# The application uses faster-whisper's built-in audio decoding instead
+# torchcodec is required for speaker diarization (pyannote.audio)
+# On Windows, FFmpeg DLLs must be available for torchcodec to work
+# The run.bat script downloads FFmpeg and copies DLLs to torchcodec directory
 _TORCHCODEC_AVAILABLE = False
 try:
     import torchcodec
     _TORCHCODEC_AVAILABLE = True
 except (ImportError, OSError, RuntimeError):
-    # torchcodec is disabled - silently ignore failures
+    # torchcodec failed to load - diarization may not work
+    logger.warning("torchcodec failed to load. Speaker diarization may not work.")
+    logger.warning("Ensure FFmpeg is installed and DLLs are available.")
     pass
 
 import wave
@@ -618,6 +620,7 @@ class FinalizeUploadPayload(BaseModel):
     output_format: str = ""
     generate_timestamps: bool = False
     use_diarization: bool = False
+    hf_token: Optional[str] = None
     callback_url: Optional[str] = None # For API chunked uploads
 
 class JobSelection(BaseModel):
@@ -1411,7 +1414,8 @@ class SrtFormatter:
 def run_transcription_task(
     job_id: str, input_path_str: str, output_path_str: str, model_size: str,
     whisper_settings: dict, app_config: dict, base_url: str,
-    generate_timestamps: bool = False, use_diarization: bool = False
+    generate_timestamps: bool = False, use_diarization: bool = False,
+    hf_token: str | None = None
 ):
     db = SessionLocal()
     input_path = Path(input_path_str)
@@ -1534,10 +1538,15 @@ def run_transcription_task(
                 update_job_status(db, job_id, "processing", progress=85, detail="Running speaker diarization...")
                 logger.info(f"Running diarization for job {job_id}")
                 
-                from diarization import run_diarization, merge_transcription_with_diarization, format_diarized_output
+                from diarization import run_diarization, merge_transcription_with_diarization, format_diarized_output, TokenRequiredError
                 
                 # Get diarization segments
-                diarization_segments = run_diarization(str(input_path))
+                try:
+                    diarization_segments = run_diarization(str(input_path), hf_token=hf_token)
+                except TokenRequiredError as e:
+                    logger.warning(f"Hugging Face token required for diarization in job {job_id}: {e}")
+                    update_job_status(db, job_id, "hf_token_required", error=str(e))
+                    return  # Exit, wait for user to provide token
                 
                 # Merge with transcription
                 # Re-transcribe to get segments with timestamps
@@ -2234,7 +2243,8 @@ def dispatch_single_file_job(original_filename: str, input_filepath: str, task_t
             app_config.get("transcription_settings", {}).get("whisper", {}),
             app_config, base_url,
             generate_timestamps=options.get('generate_timestamps', False),
-            use_diarization=options.get('use_diarization', False)
+            use_diarization=options.get('use_diarization', False),
+            hf_token=options.get('hf_token')
         )
     elif task_type == "tts":
         tts_config = app_config.get("tts_settings", {})
@@ -2640,8 +2650,12 @@ async def lifespan(app: FastAPI):
         logger.warning("piper-tts is not installed. Piper TTS features will be disabled. Install with: pip install piper-tts")
     if not shutil.which("kokoro-tts"):
         logger.warning("kokoro-tts command not found in PATH. Kokoro TTS features will be disabled.")
-    # torchcodec is disabled on Windows due to Python version compatibility issues
-    # The application uses faster-whisper's built-in audio decoding instead
+    # torchcodec is required for speaker diarization
+    if _TORCHCODEC_AVAILABLE:
+        logger.info("torchcodec loaded successfully. Speaker diarization is available.")
+    else:
+        logger.warning("torchcodec is not available. Speaker diarization will not work.")
+        logger.warning("Install torchcodec and ensure FFmpeg DLLs are available.")
 
     ENV = os.environ.get('ENV', 'dev').lower()
     ALLOW_LOCAL_ONLY = os.environ.get('ALLOW_LOCAL_ONLY', 'false').lower() == 'true'
@@ -2972,7 +2986,8 @@ async def finalize_upload(request: Request, payload: FinalizeUploadPayload, user
         sub_task_options = {
             "model_size": payload.model_size,
             "model_name": payload.model_name,
-            "output_format": payload.output_format
+            "output_format": payload.output_format,
+            "hf_token": payload.hf_token
         }
         unzip_and_dispatch_task(job_id, str(final_path), payload.task_type, sub_task_options, user, APP_CONFIG, base_url)
     else:
@@ -2982,7 +2997,8 @@ async def finalize_upload(request: Request, payload: FinalizeUploadPayload, user
             "model_name": payload.model_name,
             "output_format": payload.output_format,
             "generate_timestamps": payload.generate_timestamps,
-            "use_diarization": payload.use_diarization
+            "use_diarization": payload.use_diarization,
+            "hf_token": payload.hf_token
         }
         dispatch_single_file_job(payload.original_filename, str(final_path), payload.task_type, user, db, APP_CONFIG, base_url, job_id=job_id, options=options)
 
@@ -3010,6 +3026,7 @@ async def submit_audio_transcription(
     request: Request, file: UploadFile = File(...), model_size: str = Form("base"),
     generate_timestamps: bool = Form(False),
     use_diarization: bool = Form(False),
+    hf_token: str | None = Form(None),
     db: Session = Depends(get_db), user: dict = Depends(require_user)
 ):
     # Audio and video formats (FFmpeg can extract audio from video)
@@ -3038,7 +3055,8 @@ async def submit_audio_transcription(
     run_transcription_task(
         new_job.id, str(upload_path), str(processed_path), model_size,
         whisper_settings=whisper_config, app_config=APP_CONFIG, base_url=base_url,
-        generate_timestamps=generate_timestamps, use_diarization=use_diarization
+        generate_timestamps=generate_timestamps, use_diarization=use_diarization,
+        hf_token=hf_token
     )
     return {"job_id": new_job.id, "status": new_job.status, "status_url": f"/job/{new_job.id}"}
 

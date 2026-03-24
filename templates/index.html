@@ -190,6 +190,25 @@
     <div id="format-counter" class="format-counter" style="display: none;">
         <span id="input-format-count"></span> in | <span id="output-format-count"></span> out
     </div>
+    <div id="hf-token-dialog" class="dialog-overlay" style="display: none;">
+        <div class="dialog-box" style="width: 480px; text-align: left; max-width: 90%;">
+            <h2>HF Authentication Required</h2>
+            <p>Speaker diarization uses Pyannote models which require an active <strong>Hugging Face token</strong> and your explicit acceptance of their Terms of Service.</p>
+            <ol style="margin-bottom: 20px; padding-left: 20px; color: var(--text-color);">
+                <li>Accept conditions for <a href="https://huggingface.co/pyannote/speaker-diarization-3.1" target="_blank" style="color: var(--primary-color);">speaker-diarization-3.1</a>.</li>
+                <li>Accept conditions for <a href="https://huggingface.co/pyannote/segmentation-3.0" target="_blank" style="color: var(--primary-color);">segmentation-3.0</a>.</li>
+                <li>Create an <a href="https://huggingface.co/settings/tokens" target="_blank" style="color: var(--primary-color);">access token</a> from your HF settings.</li>
+            </ol>
+            <div class="form-control" style="margin-bottom: 20px;">
+                <label for="hf-token-input">Your Hugging Face Token:</label>
+                <input type="text" id="hf-token-input" placeholder="hf_..." required style="width: 100%; padding: 8px; box-sizing: border-box; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 4px;" />
+            </div>
+            <div class="dialog-actions" style="justify-content: flex-end;">
+                <button id="hf-token-cancel" class="dialog-cancel" style="margin-right: 10px;">Cancel Job</button>
+                <button id="hf-token-submit" class="main-action-button">Save & Retry</button>
+            </div>
+        </div>
+    </div>
     <script>
         // Inject server-side configuration for the client-side script
         window.APP_CONFIG = {

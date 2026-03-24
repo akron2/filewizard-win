@@ -61,6 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let jobPollerInterval = null; // Polling timer
     const POLLING_INTERVAL_MS = 1500; // Check for updates every 1.5 seconds
 
+    let hfTokenPendingJobId = null;
+
     // --- Core Functions ---
 
     function apiUrl(path) {
@@ -184,6 +186,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let actionHtml = '<span>-</span>';
         if (['pending', 'processing', 'uploading'].includes(job.status)) {
             actionHtml = `<button class="cancel-button" data-job-id="${job.id}"><i class="fa">&#xf00d;</i></button>`;
+        } else if (job.status === 'hf_token_required') {
+            const errorTitle = job.error_message ? ` title="${job.error_message.replace(/"/g, '&quot;')}"` : '';
+            actionHtml = `<button class="main-action-button hf-token-prompt-btn" style="margin: 0; padding: 4px 8px; font-size: 12px;" data-job-id="${job.id}"${errorTitle}>Provide Token</button> <button class="cancel-button" data-job-id="${job.id}"><i class="fa">&#xf00d;</i></button>`;
         } else if (job.status === 'completed') {
             if (job.task_type === 'unzip') {
                 actionHtml = `<a href="${apiUrl('/download/zip-batch')}/${encodeURIComponent(job.id)}" class="download-button" download><i class="fa">&#xf019;</i> Batch</a>`;
@@ -447,6 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
             options.model_size = transcriptionChoices.getValue(true);
             options.generate_timestamps = document.getElementById('main-timestamps-checkbox').checked;
             options.use_diarization = document.getElementById('main-diarization-checkbox').checked;
+            options.hf_token = localStorage.getItem('hf_token') || null;
         } else if (taskType === 'tts') {
             const selectedModel = ttsChoices.getValue(true);
             if (!selectedModel) return alert('Please select a voice model.');
@@ -541,6 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
             options.model_size = mainModelSizeSelect.value;
             options.generate_timestamps = document.getElementById('dialog-timestamps-checkbox').checked;
             options.use_diarization = document.getElementById('dialog-diarization-checkbox').checked;
+            options.hf_token = localStorage.getItem('hf_token') || null;
         } else if (action === 'tts') {
             const selectedModel = dialogTtsChoices.getValue(true);
             if (!selectedModel) return alert('Please select a voice model.');
@@ -826,13 +833,21 @@ function initializeSelectors() {
                 handleCancelJob(e.target.dataset.jobId);
             }
             const parentRow = e.target.closest('tr.parent-job');
-            if (parentRow && !e.target.classList.contains('cancel-button') && !e.target.classList.contains('download-button')) {
+            if (parentRow && !e.target.classList.contains('cancel-button') && !e.target.classList.contains('download-button') && !e.target.classList.contains('hf-token-prompt-btn')) {
                 parentRow.classList.toggle('sub-jobs-visible');
                 const areVisible = parentRow.classList.contains('sub-jobs-visible');
                 jobListBody.querySelectorAll(`tr.sub-job[data-parent-id="${parentRow.id.replace('job-', '')}"]`)
                     .forEach(subJob => {
                         subJob.style.display = areVisible ? 'table-row' : 'none';
                     });
+            }
+            
+            // Handle hf-token prompt request
+            if (e.target.classList.contains('hf-token-prompt-btn')) {
+                e.preventDefault();
+                hfTokenPendingJobId = e.target.dataset.jobId;
+                document.getElementById('hf-token-input').value = localStorage.getItem('hf_token') || '';
+                document.getElementById('hf-token-dialog').style.display = 'flex';
             }
             
             // Handle details button click
@@ -969,6 +984,26 @@ function initializeSelectors() {
         dialogOcrBtn.addEventListener('click', () => handleDialogAction('ocr'));
         dialogTranscribeBtn.addEventListener('click', () => handleDialogAction('transcription'));
         dialogCancelBtn.addEventListener('click', closeActionDialog);
+        
+        // HF Token modal listeners
+        document.getElementById('hf-token-submit').addEventListener('click', () => {
+            const token = document.getElementById('hf-token-input').value.trim();
+            if (!token) return alert('Please enter a valid Hugging Face token.');
+            localStorage.setItem('hf_token', token);
+            document.getElementById('hf-token-dialog').style.display = 'none';
+            alert('Token saved! Please select your file and submit the job again.');
+            if (hfTokenPendingJobId) {
+                handleCancelJob(hfTokenPendingJobId);
+                hfTokenPendingJobId = null;
+            }
+        });
+        document.getElementById('hf-token-cancel').addEventListener('click', () => {
+            document.getElementById('hf-token-dialog').style.display = 'none';
+            if (hfTokenPendingJobId) {
+                handleCancelJob(hfTokenPendingJobId);
+                hfTokenPendingJobId = null;
+            }
+        });
 
         // Initialize UI
         initializeSelectors();
