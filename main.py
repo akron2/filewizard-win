@@ -119,7 +119,7 @@ try:
             try:
                 os.add_dll_directory(ffmpeg_bin)
             except Exception as e:
-                logger.debug(f"Failed to add FFMPEG_BIN to dll directory: {e}")
+                print(f"[WARNING] Failed to add FFMPEG_BIN to dll directory: {e}")
                 
         # Also add torchcodec directory itself
         try:
@@ -136,8 +136,8 @@ try:
     _TORCHCODEC_AVAILABLE = True
 except Exception as e:
     # torchcodec failed to load - diarization may not work
-    logger.warning("torchcodec failed to load. Speaker diarization may not work.")
-    logger.warning("Ensure FFmpeg is installed and DLLs are available.")
+    print("[WARNING] torchcodec failed to load. Speaker diarization may not work.")
+    print("[WARNING] Ensure FFmpeg is installed and DLLs are available.")
     pass
 
 import wave
