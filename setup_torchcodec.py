@@ -27,12 +27,19 @@ def find_torchcodec_dir():
                 print(f"Found torchcodec directory at: {torchcodec_path}")
                 return torchcodec_path
     
-    # If that fails, try importing (this may fail without DLLs)
+    # If that fails, try finding spec (this avoids importing and executing __init__)
     try:
-        import torchcodec
-        return os.path.dirname(torchcodec.__file__)
-    except (ImportError, OSError):
-        return None
+        import importlib.util
+        spec = importlib.util.find_spec("torchcodec")
+        if spec and spec.submodule_search_locations:
+            torchcodec_path = spec.submodule_search_locations[0]
+            print(f"Found torchcodec directory via importlib at: {torchcodec_path}")
+            return torchcodec_path
+    except Exception:
+        pass
+        
+    print("Could not find torchcodec directory.")
+    return None
 
 
 def find_ffmpeg_bin():

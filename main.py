@@ -98,9 +98,29 @@ except ImportError:
 # The run.bat script downloads FFmpeg and copies DLLs to torchcodec directory
 _TORCHCODEC_AVAILABLE = False
 try:
+    if os.name == 'nt':
+        # Python 3.8+ on Windows requires os.add_dll_directory for ctypes to find DLLs
+        ffmpeg_bin = os.environ.get("FFMPEG_BIN")
+        if ffmpeg_bin and os.path.isdir(ffmpeg_bin):
+            try:
+                os.add_dll_directory(ffmpeg_bin)
+            except Exception as e:
+                logger.debug(f"Failed to add FFMPEG_BIN to dll directory: {e}")
+                
+        # Also add torchcodec directory itself
+        try:
+            import importlib.util
+            spec = importlib.util.find_spec("torchcodec")
+            if spec and spec.submodule_search_locations:
+                for path in spec.submodule_search_locations:
+                    if os.path.isdir(path):
+                        os.add_dll_directory(path)
+        except Exception:
+            pass
+
     import torchcodec
     _TORCHCODEC_AVAILABLE = True
-except (ImportError, OSError, RuntimeError):
+except Exception as e:
     # torchcodec failed to load - diarization may not work
     logger.warning("torchcodec failed to load. Speaker diarization may not work.")
     logger.warning("Ensure FFmpeg is installed and DLLs are available.")
