@@ -30,13 +30,32 @@ if not defined FFMPEG_BIN (
 )
 
 if not defined FFMPEG_BIN (
-    echo FFmpeg not found. Downloading...
+    echo FFmpeg not found. Downloading shared build...
+    goto :download_ffmpeg
+)
+
+REM Check if existing FFmpeg has shared DLLs (required for torchcodec)
+dir /b "%FFMPEG_BIN%\*.dll" >nul 2>nul
+if errorlevel 1 (
+    echo WARNING: FFmpeg found but no shared DLLs detected (essentials/static build^).
+    echo torchcodec requires the shared build with DLLs. Re-downloading...
+    REM Remove old essentials build
+    if exist ".\ffmpeg_temp" (
+        echo Removing old FFmpeg build...
+        rmdir /s /q ".\ffmpeg_temp"
+    )
+    set "FFMPEG_BIN="
+    goto :download_ffmpeg
+)
+goto :skip_download
+
+:download_ffmpeg
     if not exist ".\ffmpeg_temp" mkdir ".\ffmpeg_temp"
     pushd ffmpeg_temp
 
-    REM Download FFmpeg (static build for Windows)
-    echo Downloading FFmpeg...
-    powershell -Command "Invoke-WebRequest -Uri 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip' -OutFile 'ffmpeg.zip'"
+    REM Download FFmpeg (shared build for Windows - required for torchcodec DLLs)
+    echo Downloading FFmpeg (full-shared build with DLLs for torchcodec)...
+    powershell -Command "Invoke-WebRequest -Uri 'https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl-shared.zip' -OutFile 'ffmpeg.zip'"
 
     echo Extracting FFmpeg...
     powershell -Command "Expand-Archive -Path 'ffmpeg.zip' -DestinationPath '.' -Force"
@@ -57,7 +76,7 @@ if not defined FFMPEG_BIN (
     )
 
     popd
-)
+:skip_download
 
 if defined FFMPEG_BIN (
     echo FFmpeg found: %FFMPEG_BIN%
@@ -110,10 +129,19 @@ if not exist "%UPLOADS_DIR%" mkdir "%UPLOADS_DIR%"
 if not exist "%PROCESSED_DIR%" mkdir "%PROCESSED_DIR%"
 if not exist "%CHUNK_TMP_DIR%" mkdir "%CHUNK_TMP_DIR%"
 
+REM Setup torchcodec DLLs on Windows
+echo.
+echo Setting up torchcodec...
+python setup_torchcodec.py
+if errorlevel 1 (
+    echo WARNING: torchcodec setup encountered issues, but continuing...
+)
+
 echo ========================================
 echo Starting File Wizard...
 echo ========================================
 echo.
+
 echo Web interface: http://localhost:8000
 echo.
 echo Press Ctrl+C to stop the server.
