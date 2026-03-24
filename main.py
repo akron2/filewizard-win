@@ -99,8 +99,22 @@ except ImportError:
 _TORCHCODEC_AVAILABLE = False
 try:
     if os.name == 'nt':
+        import glob
         # Python 3.8+ on Windows requires os.add_dll_directory for ctypes to find DLLs
         ffmpeg_bin = os.environ.get("FFMPEG_BIN")
+        
+        if not ffmpeg_bin:
+            # Fallback 1: Local ffmpeg_temp folder
+            local_ffmpeg = glob.glob(os.path.join(".", "ffmpeg_temp", "ffmpeg-*", "bin"))
+            if local_ffmpeg and os.path.isdir(local_ffmpeg[0]):
+                ffmpeg_bin = os.path.abspath(local_ffmpeg[0])
+            else:
+                # Fallback 2: PATH environment variable
+                for path in os.environ.get("PATH", "").split(os.pathsep):
+                    if os.path.exists(os.path.join(path, "ffmpeg.exe")):
+                        ffmpeg_bin = os.path.abspath(path)
+                        break
+
         if ffmpeg_bin and os.path.isdir(ffmpeg_bin):
             try:
                 os.add_dll_directory(ffmpeg_bin)
