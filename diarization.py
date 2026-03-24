@@ -33,33 +33,9 @@ def is_diarization_available() -> bool:
     return _HAS_PYANNOTE
 
 
-def _open_token_acceptance_pages():
-    """Open Hugging Face pages for model acceptance in browser"""
-    logger.info("Opening Hugging Face pages for model acceptance...")
-    print("\n" + "="*60)
-    print("ATTENTION: Speaker diarization requires accepting model terms")
-    print("="*60)
-    print("\nOpening Hugging Face pages in your browser...")
-    print("\nPlease:")
-    print("1. Log in to Hugging Face (create account if needed)")
-    print("2. Click 'Accept' on each model page")
-    print("3. Return here and press Enter to continue")
-    print("="*60 + "\n")
-    
-    # Open all model pages in browser
-    for url in HF_MODEL_ACCEPTANCE_URLS:
-        webbrowser.open(url)
-        time.sleep(0.5)  # Small delay between opens
-
-
-def _wait_for_user_confirmation():
-    """Wait for user to confirm they accepted terms"""
-    try:
-        input("Press Enter after you've accepted the terms on all pages...")
-        return True
-    except (EOFError, KeyboardInterrupt):
-        logger.warning("User cancelled token acceptance")
-        return False
+class TokenRequiredError(Exception):
+    """Raised when Hugging Face token is missing or terms are not accepted."""
+    pass
 
 
 def run_diarization(
@@ -111,44 +87,11 @@ def run_diarization(
             error_msg = str(e)
             logger.warning(f"Initial pipeline load failed: {e}")
             
-            # Check if it's a token/acceptance issue
             if "token" in error_msg.lower() or "accept" in error_msg.lower() or "gated" in error_msg.lower():
-                print("\n" + "="*60)
-                print("Hugging Face Token Required")
-                print("="*60)
-                print("\nThe pyannote models require you to accept usage terms.")
-                print("This is a one-time process.\n")
-                
-                # Open browser for acceptance
-                _open_token_acceptance_pages()
-                
-                # Wait for user confirmation
-                if _wait_for_user_confirmation():
-                    print("\nThank you! Retrying pipeline load...")
-                    logger.info("User confirmed token acceptance, retrying...")
-                    
-                    # Wait a moment for HF to propagate acceptance
-                    time.sleep(2)
-                    
-                    # Retry loading
-                    try:
-                        pipeline = Pipeline.from_pretrained(
-                            "pyannote/speaker-diarization-3.1"
-                        )
-                        print("Success! Models loaded.\n")
-                    except Exception as retry_error:
-                        logger.error(f"Retry failed: {retry_error}")
-                        raise RuntimeError(
-                            "Could not load pyannote models even after acceptance. "
-                            "Please ensure you're logged in to Hugging Face and "
-                            "have accepted the terms on the model pages."
-                        ) from retry_error
-                else:
-                    raise RuntimeError(
-                        "Diarization cancelled by user. "
-                        "To use speaker diarization, you need to accept the model "
-                        "terms on Hugging Face."
-                    )
+                raise TokenRequiredError(
+                    "Hugging Face token is missing or you need to accept the model usage terms. "
+                    "Please provide a valid token and ensure terms are accepted."
+                )
             else:
                 raise
         
